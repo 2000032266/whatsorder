@@ -7,7 +7,7 @@ A comprehensive WhatsApp ChatBot built with Node.js and Express that handles foo
 - 🔗 **WhatsApp Integration**: Connect via Twilio WhatsApp API
 - 📋 **Dynamic Menu**: Daily menu from JSON file with emojis
 - 🛒 **Order Processing**: Accept and process food orders
-- 💾 **Data Storage**: MongoDB for orders, JSON fallback
+- 💾 **Data Storage**: MySQL database with Sequelize ORM
 - 📧 **Notifications**: Confirm orders to customers and notify owners
 - 🤖 **Smart Parsing**: Understand natural language orders
 - 🔍 **Search**: Find menu items by name or category
@@ -20,7 +20,7 @@ A comprehensive WhatsApp ChatBot built with Node.js and Express that handles foo
 
 - Node.js (v14 or higher)
 - Twilio Account with WhatsApp API access
-- MongoDB (optional, uses file storage as fallback)
+- MySQL database
 - ngrok (for local development)
 
 ### Installation
@@ -38,8 +38,14 @@ TWILIO_ACCOUNT_SID=your_twilio_account_sid
 TWILIO_AUTH_TOKEN=your_twilio_auth_token
 TWILIO_PHONE_NUMBER=whatsapp:+14155238886
 RESTAURANT_OWNER_PHONE=whatsapp:+1234567890
-MONGODB_URI=mongodb://localhost:27017/whatsorder
+MYSQL_HOST=localhost
+MYSQL_PORT=3306
+MYSQL_USER=your_mysql_user
+MYSQL_PASSWORD=your_mysql_password
+MYSQL_DATABASE=whatsorder
 WEBHOOK_URL=https://your-ngrok-url.ngrok.io/webhook
+UPI_ID=your_restaurant_upi_id
+RESTAURANT_NAME=Your Restaurant Name
 ```
 
 3. **Start the server:**
@@ -62,9 +68,10 @@ ngrok http 3000
 
 - **View Menu**: Send `menu`, `hi`, or `hello`
 - **Place Order**: 
-  - `Order 2 Chicken Biryani`
-  - `Order 1 item 3`
-  - `Order 3 #1`
+  - `Order 2 Chicken Biryani` (single item)
+  - `Order 1 item 3` (using menu item number)
+  - `Order 3 #1` (using menu ID)
+  - `Order 2 Chicken Biryani, 1 Veg Pulao, 3 Naan` (multiple items)
 - **Check Status**: Send `status` or `my orders`
 - **Get Help**: Send `help`
 - **Search**: `Find chicken` or `Do you have biryani?`
@@ -109,7 +116,7 @@ WhatsOrder/
 ├── .env                      # Environment variables
 ├── menu.json                 # Daily menu data
 ├── models/
-│   └── database.js           # MongoDB schemas
+│   └── database.js           # MySQL models with Sequelize
 ├── services/
 │   ├── menuService.js        # Menu operations
 │   ├── orderService.js       # Order management
@@ -244,9 +251,14 @@ A complete WhatsApp-based restaurant ordering system built with Node.js, Express
    # Create MySQL database
    mysql -u root -p -e "CREATE DATABASE whatsorder;"
    
-   # Run the application (tables will be created automatically)
+   # Import database structure (optional - tables are auto-created)
+   mysql -u root -p whatsorder < database-setup.sql
+   
+   # Or run the application (tables will be created automatically)
    npm start
    ```
+   
+   *Note: Check `database-setup.sql` file for complete database schema and table structures.*
 
 5. **Configure Twilio Webhook**
    - Go to Twilio Console → Phone Numbers → Your WhatsApp Number
@@ -263,7 +275,8 @@ The server will start on port 3000 (or your configured PORT).
 
 ### Customer Commands (WhatsApp)
 - `menu` - View restaurant menu
-- `Order 2 Chicken Biryani` - Place an order
+- `Order 2 Chicken Biryani` - Place single item order
+- `Order 2 Chicken Biryani, 1 Veg Pulao, 3 Naan` - Place multiple items order
 - `pay cod` - Select Cash on Delivery
 - `pay upi` - Get UPI payment details
 - `paid TXN123456` - Confirm UPI payment
@@ -299,6 +312,7 @@ whatsapp-restaurant-ordering/
 ├── package.json              # Dependencies and scripts
 ├── .env.example              # Environment variables template
 ├── menu.json                 # Restaurant menu configuration
+├── database-setup.sql        # MySQL database schema
 ├── models/
 │   └── database.js           # Database models and connection
 ├── services/
@@ -398,31 +412,25 @@ Made with ❤️ for restaurant businesses to embrace digital ordering through W
 
 ## Database Schema 💾
 
-### Orders Collection
-```javascript
-{
-  orderId: String,
-  customerPhone: String,
-  customerName: String,
-  items: [{ menuId, name, quantity, price, total }],
-  totalAmount: Number,
-  status: String,
-  orderDate: Date,
-  deliveryAddress: String,
-  notes: String
-}
-```
+The complete database schema is available in the `database-setup.sql` file. Key tables include:
 
-### Customers Collection
-```javascript
-{
-  phone: String,
-  name: String,
-  totalOrders: Number,
-  lastOrderDate: Date,
-  preferredItems: [{ menuId, name, orderCount }]
-}
-```
+### Orders Table
+- Order management with customer details
+- Item details and quantities
+- Payment and delivery status
+- Timestamps and tracking information
+
+### Customers Table  
+- Customer profile management
+- Order history and preferences
+- Contact information
+
+### Menu Items Table
+- Product catalog management
+- Pricing and availability
+- Categories and descriptions
+
+*For detailed table structures and relationships, refer to the `database-setup.sql` file.*
 
 ## Troubleshooting 🔧
 
@@ -438,7 +446,7 @@ Made with ❤️ for restaurant businesses to embrace digital ordering through W
    - Check file permissions
 
 3. **Orders not saving**
-   - Check MongoDB connection
+   - Check MySQL database connection
    - Verify environment variables
    - Review server logs for errors
 
@@ -454,7 +462,7 @@ NODE_ENV=development
 ### Production Deployment
 
 1. **Environment Setup**:
-   - Use production MongoDB instance
+   - Use production MySQL instance
    - Set up proper webhook URL
    - Configure environment variables
 
