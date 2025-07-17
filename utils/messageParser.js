@@ -21,6 +21,14 @@ class MessageParser {
   async parseMessage(message, customerPhone) {
     const normalizedMessage = message.toLowerCase().trim();
     
+    // Owner commands (check first for restaurant owner)
+    if (this.isOwnerPhone(customerPhone)) {
+      const ownerCommand = this.parseOwnerCommand(normalizedMessage);
+      if (ownerCommand) {
+        return ownerCommand;
+      }
+    }
+    
     // Payment commands (check early to handle payment flows, even for new customers)
     if (this.isPaymentCommand(normalizedMessage)) {
       return this.parsePaymentCommand(normalizedMessage, customerPhone);
@@ -103,14 +111,6 @@ class MessageParser {
         intent: 'order_status',
         data: { customerPhone }
       };
-    }
-
-    // Owner commands (only for restaurant owner)
-    if (this.isOwnerPhone(customerPhone)) {
-      const ownerCommand = this.parseOwnerCommand(normalizedMessage);
-      if (ownerCommand) {
-        return ownerCommand;
-      }
     }
 
     // Greeting and menu request
@@ -566,6 +566,15 @@ class MessageParser {
       return {
         intent: 'owner_cancel_order',
         data: { orderId: cancelMatch[1].trim() }
+      };
+    }
+
+    // Mark order as paid: "paid ORD-1234567890-ABCD"
+    const paidMatch = message.match(/^paid (.+)$/);
+    if (paidMatch) {
+      return {
+        intent: 'owner_mark_paid',
+        data: { orderId: paidMatch[1].trim() }
       };
     }
 

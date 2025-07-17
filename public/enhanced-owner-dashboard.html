@@ -171,6 +171,11 @@
             color: white;
         }
 
+        .btn-info {
+            background: #3498db;
+            color: white;
+        }
+
         .order-card {
             background: white;
             border: 1px solid #ddd;
@@ -213,6 +218,33 @@
         }
 
         .status-cancelled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .payment-status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .payment-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .payment-paid {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .payment-cod {
+            background: #ffeaa7;
+            color: #2d3436;
+        }
+
+        .payment-failed {
             background: #f8d7da;
             color: #721c24;
         }
@@ -368,6 +400,7 @@
                         <select id="statusFilter" onchange="applyFilters()">
                             <option value="pending">Pending Orders</option>
                             <option value="completed">Completed Orders</option>
+                            <option value="paid">Paid Orders</option>
                             <option value="cancelled">Cancelled Orders</option>
                             <option value="today">Today's Orders</option>
                             <option value="all">All Orders</option>
@@ -395,6 +428,7 @@
                         <button class="btn btn-primary" onclick="resetFilters()">🔄 Reset Filters</button>
                         <button class="btn btn-secondary" onclick="loadOrders('pending')">📋 Pending</button>
                         <button class="btn btn-success" onclick="loadOrders('completed')">✅ Completed</button>
+                        <button class="btn btn-info" onclick="loadOrders('paid')">💰 Paid Orders</button>
                         <button class="btn btn-warning" onclick="loadOrders('cancelled')">❌ Cancelled</button>
                         <button class="btn btn-primary" onclick="loadOrders('today')">📅 Today</button>
                     </div>
@@ -479,7 +513,11 @@
             filteredOrders = allOrders.filter(order => {
                 // Status filter
                 if (statusFilter !== 'all' && statusFilter !== 'today') {
-                    if (order.status !== statusFilter) return false;
+                    if (statusFilter === 'paid') {
+                        if (order.paymentStatus !== 'paid') return false;
+                    } else {
+                        if (order.status !== statusFilter) return false;
+                    }
                 }
 
                 // Date filter
@@ -589,6 +627,10 @@
                                 </p>
                                 <p><strong>Method:</strong> ${getPaymentMethodText(order.paymentMethod || 'cod')}</p>
                                 ${order.paymentId ? `<p><strong>Payment ID:</strong> ${order.paymentId}</p>` : ''}
+                                ${order.paymentStatus === 'paid' && order.paymentMethod === 'upi' ? 
+                                    `<p style="color: #27ae60; font-weight: bold;">💰 Paid via UPI</p>` : ''}
+                                ${order.paymentMethod === 'cod' && order.paymentStatus !== 'paid' ? 
+                                    `<p style="color: #f39c12; font-weight: bold;">💵 Cash on Delivery</p>` : ''}
                             </div>
                             
                             <div class="order-items">
@@ -610,6 +652,11 @@
                                 <button class="btn btn-success" onclick="updateOrderStatus('${order.id}', 'completed')">
                                     ✅ Complete Order
                                 </button>
+                                ${order.paymentStatus !== 'paid' ? `
+                                    <button class="btn btn-info" onclick="markOrderAsPaid('${order.id}')">
+                                        💰 Mark as Paid
+                                    </button>
+                                ` : ''}
                                 <button class="btn btn-danger" onclick="updateOrderStatus('${order.id}', 'cancelled')">
                                     ❌ Cancel Order
                                 </button>
@@ -645,6 +692,32 @@
             } catch (error) {
                 console.error('Error updating order:', error);
                 alert('Error updating order status');
+            }
+        }
+
+        // Mark order as paid
+        async function markOrderAsPaid(orderId) {
+            try {
+                const response = await fetch(`/owner/orders/${orderId}/payment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ action: 'mark_paid' })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    // Reload current view
+                    loadDashboard();
+                    alert('✅ Order marked as paid successfully!');
+                } else {
+                    alert('Error marking order as paid: ' + (result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error marking order as paid:', error);
+                alert('Error marking order as paid');
             }
         }
 

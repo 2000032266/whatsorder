@@ -121,6 +121,36 @@ class OrderService {
   }
 
   /**
+   * Get order by short code (last 4 digits of order ID)
+   * @param {string} shortCode - Short code (last 4 characters)
+   * @returns {Promise<Object|null>} Order or null
+   */
+  async getOrderByShortCode(shortCode) {
+    try {
+      // If it's already a full order ID, use it directly
+      if (shortCode.startsWith('ORD-')) {
+        return await this.getOrderById(shortCode);
+      }
+      
+      // Find order where orderId ends with the short code
+      const orders = await Order.findAll({
+        where: {
+          orderId: {
+            [Op.like]: `%-${shortCode}`
+          }
+        },
+        order: [['createdAt', 'DESC']]
+      });
+      
+      // Return the most recent match
+      return orders.length > 0 ? orders[0] : null;
+    } catch (error) {
+      console.error('Error getting order by short code:', error);
+      return null;
+    }
+  }
+
+  /**
    * Get customer orders
    * @param {string} customerPhone - Customer phone
    * @param {number} limit - Number of orders to return
@@ -158,6 +188,9 @@ class OrderService {
           break;
         case 'cancelled':
           whereClause.status = 'cancelled';
+          break;
+        case 'paid':
+          whereClause.paymentStatus = 'paid';
           break;
         case 'today':
           const today = new Date();

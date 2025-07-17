@@ -1,5 +1,5 @@
 {
-  "date": "2025-07-16",
+  "date": "2025-07-17",
   "restaurant_name": "Delicious Bites",
   "menu": [
     {
@@ -97,6 +97,15 @@
       "name": "dosa",
       "description": "Delicious dosa",
       "price": 40,
+      "category": "Main Course",
+      "available": true,
+      "emoji": "🍛"
+    },
+    {
+      "id": 15,
+      "name": "neti idly",
+      "description": "Delicious idly",
+      "price": 20,
       "category": "Main Course",
       "available": true,
       "emoji": "🍛"

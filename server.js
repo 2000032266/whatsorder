@@ -121,6 +121,10 @@ app.post('/webhook', async (req, res) => {
         responseMessage = await handleOwnerCancelOrder(parseResult.data);
         break;
 
+      case 'owner_mark_paid':
+        responseMessage = await handleOwnerMarkPaid(parseResult.data);
+        break;
+
       case 'owner_stats':
         responseMessage = await handleOwnerStatsRequest();
         break;
@@ -635,10 +639,9 @@ async function handleOwnerCompleteOrder(data) {
     // Strategy 1: Exact match (full order ID)
     order = await orderService.getOrderById(inputId);
     
-    // Strategy 2: If not found and input looks like a short code (4 chars), search by ending
-    if (!order && inputId.length === 4 && inputId.match(/^[A-Z0-9]{4}$/)) {
-      const allOrders = await orderService.getOrdersForOwner('pending', 50);
-      order = allOrders.find(o => o.orderId.endsWith(inputId));
+    // Strategy 2: Try short code match (any length ending pattern)
+    if (!order) {
+      order = await orderService.getOrderByShortCode(inputId);
     }
     
     // Strategy 3: If input is a number, treat as position in pending orders list
@@ -698,10 +701,23 @@ async function handleOwnerCompleteOrder(data) {
  */
 async function handleOwnerCancelOrder(data) {
   try {
-    const order = await orderService.updateOrderStatus(data.orderId, 'cancelled');
+    // Find the order using full ID or short code
+    let order = await orderService.getOrderById(data.orderId);
+    
+    // If not found, try short code
+    if (!order) {
+      order = await orderService.getOrderByShortCode(data.orderId);
+    }
     
     if (!order) {
-      return `❌ Order #${data.orderId} not found.\n\nTip: Use "orders" to see all pending orders.`;
+      return `❌ Order #${data.orderId} not found.\n\nTip: Use "orders" to see all pending orders or use the last 4 digits of order ID.`;
+    }
+    
+    // Update order status to cancelled
+    const updatedOrder = await orderService.updateOrderStatus(order.orderId, 'cancelled');
+    
+    if (!updatedOrder) {
+      return `❌ Failed to cancel order #${order.orderId}.`;
     }
 
     // Notify customer
@@ -724,6 +740,58 @@ async function handleOwnerCancelOrder(data) {
   } catch (error) {
     console.error('Error cancelling order:', error);
     return "❌ Error cancelling order. Please try again.";
+  }
+}
+
+/**
+ * Handle owner mark order as paid request
+ */
+async function handleOwnerMarkPaid(data) {
+  try {
+    const paymentService = new PaymentService();
+    const { orderId } = data;
+    
+    // Find the specific order by orderId or short code
+    let order = await orderService.getOrderById(orderId);
+    
+    // If not found, try to find by short code (last 4 digits)
+    if (!order) {
+      order = await orderService.getOrderByShortCode(orderId);
+    }
+    
+    if (!order) {
+      return `❌ Order #${orderId} not found.\n\nTip: Use "orders" to see all pending orders or use the last 4 digits of order ID.`;
+    }
+
+    // Update payment status to 'paid'
+    const updatedOrder = await paymentService.updatePaymentStatus(order.orderId, 'paid', order.paymentMethod || 'cod', 'OWNER_CONFIRMED');
+    
+    if (!updatedOrder) {
+      return `❌ Failed to update payment status for order #${order.orderId}.`;
+    }
+
+    // Notify customer
+    try {
+      const customerMessage = `✅ *Payment Confirmed!*\n\n` +
+        `📋 Order #${order.orderId}\n` +
+        `💰 Amount: ₹${parseFloat(order.totalAmount).toFixed(2)}\n` +
+        `💳 Payment Method: ${order.paymentMethod?.toUpperCase() || 'COD'}\n\n` +
+        `Your payment has been confirmed by our restaurant. Thank you! 🙏`;
+      
+      await whatsappService.sendMessage(order.customerPhone, customerMessage);
+    } catch (customerError) {
+      console.error('Error notifying customer about payment confirmation:', customerError.message);
+    }
+
+    return `✅ *Payment confirmed for Order #${order.orderId}*\n\n` +
+      `👤 Customer: ${order.customerName}\n` +
+      `💰 Amount: ₹${parseFloat(order.totalAmount).toFixed(2)}\n` +
+      `💳 Method: ${order.paymentMethod?.toUpperCase() || 'COD'}\n` +
+      `📱 Customer notified: ${order.customerPhone}\n\n` +
+      `Payment status updated to PAID.`;
+  } catch (error) {
+    console.error('Error marking order as paid:', error);
+    return "❌ Error updating payment status. Please try again.";
   }
 }
 
@@ -1269,6 +1337,52 @@ app.post('/owner/orders/:orderId/status', async (req, res) => {
   }
 });
 
+// Update order payment status
+app.post('/owner/orders/:orderId/payment', async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { action } = req.body;
+    
+    if (action !== 'mark_paid') {
+      return res.status(400).json({ error: 'Invalid action' });
+    }
+    
+    const paymentService = new PaymentService();
+    const order = await orderService.getOrderById(orderId);
+    
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+    
+    // Update payment status to 'paid'
+    const updatedOrder = await paymentService.updatePaymentStatus(orderId, 'paid', order.paymentMethod || 'cod', 'ADMIN_CONFIRMED');
+    
+    if (!updatedOrder) {
+      return res.status(500).json({ error: 'Failed to update payment status' });
+    }
+    
+    // Send WhatsApp notification to customer
+    try {
+      const customerMessage = `✅ *Payment Confirmed!*\n\n` +
+        `📋 Order #${order.orderId}\n` +
+        `💰 Amount: ₹${parseFloat(order.totalAmount).toFixed(2)}\n` +
+        `💳 Payment Method: ${order.paymentMethod?.toUpperCase() || 'COD'}\n\n` +
+        `Your payment has been confirmed by our restaurant. Thank you! 🙏`;
+      
+      await whatsappService.sendMessage(order.customerPhone, customerMessage);
+      console.log(`📱 Customer notified of payment confirmation for order ${orderId}`);
+    } catch (notificationError) {
+      console.error('Error sending payment confirmation notification:', notificationError.message);
+      // Don't fail the request if notification fails
+    }
+    
+    res.json({ success: true, order: { id: order.orderId, paymentStatus: updatedOrder.paymentStatus } });
+  } catch (error) {
+    console.error('Error updating payment status:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Owner dashboard route
 app.get('/owner', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'owner-dashboard.html'));
@@ -1336,6 +1450,10 @@ app.post('/debug/message', async (req, res) => {
 
       case 'owner_cancel_order':
         responseMessage = await handleOwnerCancelOrder(parseResult.data);
+        break;
+
+      case 'owner_mark_paid':
+        responseMessage = await handleOwnerMarkPaid(parseResult.data);
         break;
 
       case 'owner_stats':

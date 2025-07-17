@@ -7,7 +7,7 @@ A comprehensive WhatsApp ChatBot built with Node.js and Express that handles foo
 - 🔗 **WhatsApp Integration**: Connect via Twilio WhatsApp API
 - 📋 **Dynamic Menu**: Daily menu from JSON file with emojis
 - 🛒 **Order Processing**: Accept and process food orders
-- 💾 **Data Storage**: MongoDB for orders, JSON fallback
+- 💾 **Data Storage**: MySQL database with Sequelize ORM
 - 📧 **Notifications**: Confirm orders to customers and notify owners
 - 🤖 **Smart Parsing**: Understand natural language orders
 - 🔍 **Search**: Find menu items by name or category
@@ -20,7 +20,7 @@ A comprehensive WhatsApp ChatBot built with Node.js and Express that handles foo
 
 - Node.js (v14 or higher)
 - Twilio Account with WhatsApp API access
-- MongoDB (optional, uses file storage as fallback)
+- MySQL database
 - ngrok (for local development)
 
 ### Installation
@@ -38,8 +38,14 @@ TWILIO_ACCOUNT_SID=your_twilio_account_sid
 TWILIO_AUTH_TOKEN=your_twilio_auth_token
 TWILIO_PHONE_NUMBER=whatsapp:+14155238886
 RESTAURANT_OWNER_PHONE=whatsapp:+1234567890
-MONGODB_URI=mongodb://localhost:27017/whatsorder
+MYSQL_HOST=localhost
+MYSQL_PORT=3306
+MYSQL_USER=your_mysql_user
+MYSQL_PASSWORD=your_mysql_password
+MYSQL_DATABASE=whatsorder
 WEBHOOK_URL=https://your-ngrok-url.ngrok.io/webhook
+UPI_ID=your_restaurant_upi_id
+RESTAURANT_NAME=Your Restaurant Name
 ```
 
 3. **Start the server:**
@@ -62,9 +68,10 @@ ngrok http 3000
 
 - **View Menu**: Send `menu`, `hi`, or `hello`
 - **Place Order**: 
-  - `Order 2 Chicken Biryani`
-  - `Order 1 item 3`
-  - `Order 3 #1`
+  - `Order 2 Chicken Biryani` (single item)
+  - `Order 1 item 3` (using menu item number)
+  - `Order 3 #1` (using menu ID)
+  - `Order 2 Chicken Biryani, 1 Veg Pulao, 3 Naan` (multiple items)
 - **Check Status**: Send `status` or `my orders`
 - **Get Help**: Send `help`
 - **Search**: `Find chicken` or `Do you have biryani?`
@@ -100,6 +107,13 @@ Bot: ✅ Order placed successfully!
 - `POST /orders/:orderId/status` - Update order status
 - `POST /send-welcome` - Send welcome message
 
+### Owner Dashboard
+- `GET /dashboard` - Basic owner dashboard
+- `GET /enhanced-dashboard` - Enhanced dashboard with payment filters
+- `GET /owner/orders` - Get filtered orders (supports `?filter=paid` for paid orders)
+- `POST /owner/orders/:orderId/status` - Update order status
+- `POST /owner/orders/:orderId/payment` - Mark order as paid (dashboard)
+
 ## Project Structure 📁
 
 ```
@@ -109,7 +123,7 @@ WhatsOrder/
 ├── .env                      # Environment variables
 ├── menu.json                 # Daily menu data
 ├── models/
-│   └── database.js           # MongoDB schemas
+│   └── database.js           # MySQL models with Sequelize
 ├── services/
 │   ├── menuService.js        # Menu operations
 │   ├── orderService.js       # Order management
@@ -180,14 +194,17 @@ A complete WhatsApp-based restaurant ordering system built with Node.js, Express
 
 ### For Restaurant Owners
 - **Order Management**: Receive and manage orders through WhatsApp
-- **Dashboard**: Web-based dashboard for order tracking
-- **Payment Tracking**: Monitor payment status and methods
+- **Dashboard**: Web-based dashboard for order tracking with paid orders filter
+- **Payment Tracking**: Monitor payment status and methods with manual confirmation
 - **Customer Management**: Track customer information and order history
+- **Short Code Commands**: Use last 4 digits of order ID for quick actions
 
 ### Payment System
 - **Cash on Delivery (COD)**: Pay when food is delivered
 - **UPI Payments**: Instant payments with UPI links and QR codes
 - **Payment Confirmation**: Automated payment status tracking
+- **Owner Payment Management**: Mark orders as paid via WhatsApp or dashboard
+- **Short Code Support**: Use last 4 digits of order ID for convenience
 
 ## 🛠️ Tech Stack
 
@@ -244,9 +261,14 @@ A complete WhatsApp-based restaurant ordering system built with Node.js, Express
    # Create MySQL database
    mysql -u root -p -e "CREATE DATABASE whatsorder;"
    
-   # Run the application (tables will be created automatically)
+   # Import database structure (optional - tables are auto-created)
+   mysql -u root -p whatsorder < database-setup.sql
+   
+   # Or run the application (tables will be created automatically)
    npm start
    ```
+   
+   *Note: Check `database-setup.sql` file for complete database schema and table structures.*
 
 5. **Configure Twilio Webhook**
    - Go to Twilio Console → Phone Numbers → Your WhatsApp Number
@@ -263,7 +285,8 @@ The server will start on port 3000 (or your configured PORT).
 
 ### Customer Commands (WhatsApp)
 - `menu` - View restaurant menu
-- `Order 2 Chicken Biryani` - Place an order
+- `Order 2 Chicken Biryani` - Place single item order
+- `Order 2 Chicken Biryani, 1 Veg Pulao, 3 Naan` - Place multiple items order
 - `pay cod` - Select Cash on Delivery
 - `pay upi` - Get UPI payment details
 - `paid TXN123456` - Confirm UPI payment
@@ -272,24 +295,57 @@ The server will start on port 3000 (or your configured PORT).
 
 ### Owner Commands (WhatsApp)
 - `orders` - View pending orders
-- `complete [order_id]` - Mark order as complete
+- `complete [order_id]` - Mark order as complete (use full ID or last 4 digits)
+- `paid [order_id]` - Mark specific order as paid (use full ID or last 4 digits)  
 - `stats` - View daily statistics
+
+**Examples:**
+- `paid ABCD` - Mark order ending in ABCD as paid
+- `complete 1234` - Complete order ending in 1234
+- `cancel WXYZ` - Cancel order ending in WXYZ
+- `paid ORD-1234567890-ABCD` - Full order ID also works
+
+**Payment Workflow:**
+- For **COD orders**: Use `paid [last4digits]` when cash is received
+- For **UPI orders**: Use `paid [last4digits]` to manually confirm if needed
+- Order completion (`complete`) is separate from payment confirmation
+- Both COD and UPI orders can be completed before payment confirmation
 
 ### Dashboard
 Access the owner dashboard at: `http://localhost:3000/dashboard`
+
+**Dashboard Features:**
+- **📋 Pending Orders** - View all pending orders
+- **✅ Completed Orders** - View completed orders  
+- **💰 Paid Orders** - Filter orders by payment status
+- **❌ Cancelled Orders** - View cancelled orders
+- **📅 Today's Orders** - Daily order overview
+- **Complete Order Button** - Mark orders as ready (separate from payment)
+- **Mark as Paid Button** - Manually confirm payment received
+- **Payment Status Display** - Clear indication of UPI vs COD payments
 
 ## 📱 Payment Methods
 
 ### Cash on Delivery (COD)
 - Customers select COD option
 - Payment collected on delivery
+- Owner can mark as paid using `paid [order_id]` command
 - Automatic order confirmation
 
 ### UPI Payments
 - Generate UPI payment links
 - QR code for easy scanning
 - Payment confirmation with transaction ID
+- Automatic payment status update to "paid"
 - Support for all major UPI apps (PhonePe, Google Pay, Paytm)
+- Owner can manually confirm if needed using `paid [order_id]` command
+
+### Payment Management
+- **Separate workflow**: Order completion ≠ Payment confirmation
+- **COD orders**: Can be marked "complete" without payment confirmation
+- **UPI orders**: Automatically marked as paid when customer confirms
+- **Manual override**: Owner can mark any order as paid using short commands
+- **Dashboard control**: "Mark as Paid" button for manual confirmation
 
 ## 🏗️ Project Structure
 
@@ -299,6 +355,7 @@ whatsapp-restaurant-ordering/
 ├── package.json              # Dependencies and scripts
 ├── .env.example              # Environment variables template
 ├── menu.json                 # Restaurant menu configuration
+├── database-setup.sql        # MySQL database schema
 ├── models/
 │   └── database.js           # Database models and connection
 ├── services/
@@ -388,6 +445,25 @@ For support and questions:
 - Customer feedback system
 - Analytics dashboard
 - Multi-restaurant support
+- Automated payment gateway integration
+- SMS notifications backup
+- Voice order support
+
+## 🔧 Recent Updates
+
+### Payment Management Enhancements
+- ✅ **Fixed payment confirmation bug** - Owner `paid [orderId]` command now targets correct order
+- ✅ **Added short code support** - Use last 4 digits of order ID for convenience
+- ✅ **Separated completion from payment** - Complete orders without automatic payment marking
+- ✅ **Enhanced dashboard** - Added "Paid Orders" filter and "Mark as Paid" button
+- ✅ **Improved payment display** - Clear indication of UPI vs COD payment status
+- ✅ **Owner command priority** - Owner commands processed before customer payment commands
+
+### Dashboard Improvements
+- ✅ **💰 Paid Orders tab** - Filter to view all paid orders
+- ✅ **Payment status indicators** - Visual payment confirmation status
+- ✅ **Manual payment confirmation** - Button to mark orders as paid
+- ✅ **Enhanced order cards** - Better payment information display
 
 ---
 
@@ -398,31 +474,25 @@ Made with ❤️ for restaurant businesses to embrace digital ordering through W
 
 ## Database Schema 💾
 
-### Orders Collection
-```javascript
-{
-  orderId: String,
-  customerPhone: String,
-  customerName: String,
-  items: [{ menuId, name, quantity, price, total }],
-  totalAmount: Number,
-  status: String,
-  orderDate: Date,
-  deliveryAddress: String,
-  notes: String
-}
-```
+The complete database schema is available in the `database-setup.sql` file. Key tables include:
 
-### Customers Collection
-```javascript
-{
-  phone: String,
-  name: String,
-  totalOrders: Number,
-  lastOrderDate: Date,
-  preferredItems: [{ menuId, name, orderCount }]
-}
-```
+### Orders Table
+- Order management with customer details
+- Item details and quantities
+- Payment and delivery status
+- Timestamps and tracking information
+
+### Customers Table  
+- Customer profile management
+- Order history and preferences
+- Contact information
+
+### Menu Items Table
+- Product catalog management
+- Pricing and availability
+- Categories and descriptions
+
+*For detailed table structures and relationships, refer to the `database-setup.sql` file.*
 
 ## Troubleshooting 🔧
 
@@ -438,9 +508,20 @@ Made with ❤️ for restaurant businesses to embrace digital ordering through W
    - Check file permissions
 
 3. **Orders not saving**
-   - Check MongoDB connection
+   - Check MySQL database connection
    - Verify environment variables
    - Review server logs for errors
+
+4. **Payment confirmation not working**
+   - Ensure owner phone number matches `RESTAURANT_OWNER_PHONE` in `.env`
+   - Use exact format: `paid ABCD` (last 4 digits of order ID)
+   - Check if order exists using `orders` command first
+   - Verify order ID format in server logs
+
+5. **Dashboard not showing paid orders**
+   - Click "💰 Paid Orders" filter button
+   - Check if orders have `paymentStatus = 'paid'` in database
+   - Refresh dashboard after marking orders as paid
 
 ### Debug Mode
 
@@ -454,7 +535,7 @@ NODE_ENV=development
 ### Production Deployment
 
 1. **Environment Setup**:
-   - Use production MongoDB instance
+   - Use production MySQL instance
    - Set up proper webhook URL
    - Configure environment variables
 
