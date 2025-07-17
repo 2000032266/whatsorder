@@ -1,0 +1,105 @@
+{
+  "date": "2025-07-16",
+  "restaurant_name": "Delicious Bites",
+  "menu": [
+    {
+      "id": 1,
+      "name": "Chicken Biryani",
+      "description": "Aromatic basmati rice with tender chicken pieces",
+      "price": 299,
+      "category": "Main Course",
+      "available": true,
+      "emoji": "🍛"
+    },
+    {
+      "id": 2,
+      "name": "Mutton Karahi",
+      "description": "Spicy mutton curry cooked in traditional style",
+      "price": 399,
+      "category": "Main Course",
+      "available": true,
+      "emoji": "🍖"
+    },
+    {
+      "id": 3,
+      "name": "Chicken Tikka",
+      "description": "Grilled chicken marinated in yogurt and spices",
+      "price": 249,
+      "category": "Appetizer",
+      "available": true,
+      "emoji": "🍗"
+    },
+    {
+      "id": 4,
+      "name": "Vegetable Pulao",
+      "description": "Fragrant rice with mixed vegetables",
+      "price": 199,
+      "category": "Main Course",
+      "available": true,
+      "emoji": "🍚"
+    },
+    {
+      "id": 5,
+      "name": "Naan Bread",
+      "description": "Fresh baked traditional bread",
+      "price": 49,
+      "category": "Bread",
+      "available": true,
+      "emoji": "🫓"
+    },
+    {
+      "id": 7,
+      "name": "Gulab Jamun",
+      "description": "Sweet milk dumplings in sugar syrup",
+      "price": 99,
+      "category": "Dessert",
+      "available": true,
+      "emoji": "🍯"
+    },
+    {
+      "id": 10,
+      "name": "masala chai",
+      "description": "hot spiced tea with aromatic spices",
+      "price": 25,
+      "category": "Beverage",
+      "available": false,
+      "emoji": "🍵"
+    },
+    {
+      "id": 11,
+      "name": "pulka",
+      "description": "Delicious pulka",
+      "price": 15,
+      "category": "Bread",
+      "available": true,
+      "emoji": "🫓"
+    },
+    {
+      "id": 12,
+      "name": "butten naan",
+      "description": "Delicious butten naan",
+      "price": 45,
+      "category": "Main Course",
+      "available": true,
+      "emoji": "🫓"
+    },
+    {
+      "id": 13,
+      "name": "mughalai biriyani",
+      "description": "Delicious mughalai biriyani",
+      "price": 180,
+      "category": "Main Course",
+      "available": true,
+      "emoji": "🍛"
+    },
+    {
+      "id": 14,
+      "name": "dosa",
+      "description": "Delicious dosa",
+      "price": 40,
+      "category": "Main Course",
+      "available": true,
+      "emoji": "🍛"
+    }
+  ]
+}

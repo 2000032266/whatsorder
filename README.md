@@ -1,0 +1,493 @@
+# WhatsApp Food Ordering Bot 🍽️📱
+
+A comprehensive WhatsApp ChatBot built with Node.js and Express that handles food orders through Twilio's WhatsApp API. Perfect for restaurants wanting to automate their ordering process!
+
+## Features ✨
+
+- 🔗 **WhatsApp Integration**: Connect via Twilio WhatsApp API
+- 📋 **Dynamic Menu**: Daily menu from JSON file with emojis
+- 🛒 **Order Processing**: Accept and process food orders
+- 💾 **Data Storage**: MongoDB for orders, JSON fallback
+- 📧 **Notifications**: Confirm orders to customers and notify owners
+- 🤖 **Smart Parsing**: Understand natural language orders
+- 🔍 **Search**: Find menu items by name or category
+- 📊 **Status Tracking**: Real-time order status updates
+- 💡 **Help System**: Built-in help and command assistance
+
+## Quick Start 🚀
+
+### Prerequisites
+
+- Node.js (v14 or higher)
+- Twilio Account with WhatsApp API access
+- MongoDB (optional, uses file storage as fallback)
+- ngrok (for local development)
+
+### Installation
+
+1. **Clone and install dependencies:**
+```bash
+cd WhatsOrder
+npm install
+```
+
+2. **Configure environment variables:**
+Update `.env` file with your credentials:
+```env
+TWILIO_ACCOUNT_SID=your_twilio_account_sid
+TWILIO_AUTH_TOKEN=your_twilio_auth_token
+TWILIO_PHONE_NUMBER=whatsapp:+14155238886
+RESTAURANT_OWNER_PHONE=whatsapp:+1234567890
+MONGODB_URI=mongodb://localhost:27017/whatsorder
+WEBHOOK_URL=https://your-ngrok-url.ngrok.io/webhook
+```
+
+3. **Start the server:**
+```bash
+npm run dev
+```
+
+4. **Set up ngrok for local development:**
+```bash
+ngrok http 3000
+```
+
+5. **Configure Twilio webhook:**
+- Go to Twilio Console > WhatsApp > Sandbox
+- Set webhook URL to: `https://your-ngrok-url.ngrok.io/webhook`
+
+## Usage 📱
+
+### Customer Commands
+
+- **View Menu**: Send `menu`, `hi`, or `hello`
+- **Place Order**: 
+  - `Order 2 Chicken Biryani`
+  - `Order 1 item 3`
+  - `Order 3 #1`
+- **Check Status**: Send `status` or `my orders`
+- **Get Help**: Send `help`
+- **Search**: `Find chicken` or `Do you have biryani?`
+
+### Example Conversations
+
+```
+Customer: hi
+Bot: 🍽️ Delicious Bites - Today's Menu
+     📅 Date: 2025-07-16
+     
+     Main Course 🍴
+     🍛 1. Chicken Biryani - $12.99
+        Aromatic basmati rice with tender chicken pieces
+     ...
+
+Customer: Order 2 Chicken Biryani
+Bot: ✅ Order placed successfully!
+     📋 Order ID: ORD-1642345678-A1B2
+     💰 Total: $25.98
+     🕐 We'll notify you when your order is ready!
+```
+
+## API Endpoints 🛠️
+
+### Webhook
+- `POST /webhook` - Handle incoming WhatsApp messages
+
+### Management
+- `GET /health` - Health check
+- `GET /menu` - Get current menu
+- `GET /orders/daily-summary` - Daily orders summary
+- `POST /orders/:orderId/status` - Update order status
+- `POST /send-welcome` - Send welcome message
+
+## Project Structure 📁
+
+```
+WhatsOrder/
+├── server.js                 # Main server file
+├── package.json              # Dependencies
+├── .env                      # Environment variables
+├── menu.json                 # Daily menu data
+├── models/
+│   └── database.js           # MongoDB schemas
+├── services/
+│   ├── menuService.js        # Menu operations
+│   ├── orderService.js       # Order management
+│   └── whatsappService.js    # WhatsApp messaging
+└── utils/
+    ├── messageParser.js      # Message parsing logic
+    └── responseTemplates.js  # Response templates
+```
+
+## Menu Configuration 🍽️
+
+Update `menu.json` daily with your restaurant's offerings:
+
+```json
+{
+  "date": "2025-07-16",
+  "restaurant_name": "Your Restaurant",
+  "menu": [
+    {
+      "id": 1,
+      "name": "Chicken Biryani",
+      "description": "Aromatic basmati rice with tender chicken",
+      "price": 12.99,
+      "category": "Main Course",
+      "available": true,
+      "emoji": "🍛"
+    }
+  ]
+}
+```
+
+## Order Management 📊
+
+### For Restaurant Owners
+
+1. **Receive Notifications**: Get WhatsApp alerts for new orders
+2. **Update Status**: Use API endpoints to update order status
+3. **Daily Reports**: Check `/orders/daily-summary` for insights
+
+### Order Status Flow
+- `pending` → `confirmed` → `preparing` → `ready` → `delivered`
+
+## Customization 🎨
+
+### Adding New Features
+
+1. **Custom Commands**: Add new intents in `messageParser.js`
+2. **Response Templates**: Modify `responseTemplates.js`
+3. **Menu Categories**: Update menu structure in `menu.json`
+4. **Order Workflow**: Customize order processing in `orderService.js`
+
+### Message Templates
+
+All responses use emojis and structured formatting for better readability:
+- ✅ Success messages
+- ❌ # WhatsApp Restaurant Ordering System
+
+A complete WhatsApp-based restaurant ordering system built with Node.js, Express, and Twilio. Customers can place orders, make payments (COD/UPI), and track their orders through WhatsApp messages.
+
+## 🚀 Features
+
+### For Customers
+- **WhatsApp Ordering**: Place orders directly through WhatsApp messages
+- **Smart Menu**: View menu with categories and prices
+- **Order Tracking**: Real-time order status updates
+- **Payment Options**: Cash on Delivery (COD) and UPI payments
+- **Location-based Delivery**: Address management for delivery
+
+### For Restaurant Owners
+- **Order Management**: Receive and manage orders through WhatsApp
+- **Dashboard**: Web-based dashboard for order tracking
+- **Payment Tracking**: Monitor payment status and methods
+- **Customer Management**: Track customer information and order history
+
+### Payment System
+- **Cash on Delivery (COD)**: Pay when food is delivered
+- **UPI Payments**: Instant payments with UPI links and QR codes
+- **Payment Confirmation**: Automated payment status tracking
+
+## 🛠️ Tech Stack
+
+- **Backend**: Node.js, Express.js
+- **Database**: MySQL with Sequelize ORM
+- **WhatsApp API**: Twilio WhatsApp Business API
+- **Payment**: UPI integration for Indian payments
+- **Frontend**: HTML/CSS/JavaScript dashboard
+
+## 📋 Prerequisites
+
+- Node.js (v14 or higher)
+- MySQL database
+- Twilio account with WhatsApp Business API
+- Ngrok for webhook tunneling (development)
+
+## ⚙️ Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/whatsapp-restaurant-ordering.git
+   cd whatsapp-restaurant-ordering
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**
+   ```bash
+   cp .env.example .env
+   ```
+   
+   Edit `.env` with your configuration:
+   ```env
+   PORT=3000
+   TWILIO_ACCOUNT_SID=your_twilio_account_sid
+   TWILIO_AUTH_TOKEN=your_twilio_auth_token
+   TWILIO_PHONE_NUMBER=whatsapp:+your_twilio_whatsapp_number
+   RESTAURANT_OWNER_PHONE=whatsapp:+your_owner_phone
+   MYSQL_HOST=localhost
+   MYSQL_PORT=3306
+   MYSQL_USER=your_mysql_user
+   MYSQL_PASSWORD=your_mysql_password
+   MYSQL_DATABASE=whatsorder
+   WEBHOOK_URL=your_ngrok_url
+   UPI_ID=your_restaurant_upi_id
+   RESTAURANT_NAME=Your Restaurant Name
+   ```
+
+4. **Set up the database**
+   ```bash
+   # Create MySQL database
+   mysql -u root -p -e "CREATE DATABASE whatsorder;"
+   
+   # Run the application (tables will be created automatically)
+   npm start
+   ```
+
+5. **Configure Twilio Webhook**
+   - Go to Twilio Console → Phone Numbers → Your WhatsApp Number
+   - Set webhook URL: `https://your-ngrok-url.ngrok.io/webhook`
+
+## 🚀 Usage
+
+### Starting the Server
+```bash
+npm start
+```
+
+The server will start on port 3000 (or your configured PORT).
+
+### Customer Commands (WhatsApp)
+- `menu` - View restaurant menu
+- `Order 2 Chicken Biryani` - Place an order
+- `pay cod` - Select Cash on Delivery
+- `pay upi` - Get UPI payment details
+- `paid TXN123456` - Confirm UPI payment
+- `payment help` - View payment options
+- `status` - Check order status
+
+### Owner Commands (WhatsApp)
+- `orders` - View pending orders
+- `complete [order_id]` - Mark order as complete
+- `stats` - View daily statistics
+
+### Dashboard
+Access the owner dashboard at: `http://localhost:3000/dashboard`
+
+## 📱 Payment Methods
+
+### Cash on Delivery (COD)
+- Customers select COD option
+- Payment collected on delivery
+- Automatic order confirmation
+
+### UPI Payments
+- Generate UPI payment links
+- QR code for easy scanning
+- Payment confirmation with transaction ID
+- Support for all major UPI apps (PhonePe, Google Pay, Paytm)
+
+## 🏗️ Project Structure
+
+```
+whatsapp-restaurant-ordering/
+├── server.js                 # Main server file
+├── package.json              # Dependencies and scripts
+├── .env.example              # Environment variables template
+├── menu.json                 # Restaurant menu configuration
+├── models/
+│   └── database.js           # Database models and connection
+├── services/
+│   ├── whatsappService.js    # WhatsApp messaging service
+│   ├── menuService.js        # Menu management service
+│   ├── orderService.js       # Order processing service
+│   ├── customerService.js    # Customer management service
+│   └── paymentService.js     # Payment processing service
+├── utils/
+│   ├── messageParser.js      # WhatsApp message parsing
+│   └── responseTemplates.js  # Message templates
+└── public/
+    └── enhanced-owner-dashboard.html  # Owner dashboard
+```
+
+## 🌐 Deployment
+
+### Deploy to Railway
+1. Fork this repository
+2. Connect to Railway
+3. Add environment variables
+4. Deploy automatically
+
+### Deploy to Heroku
+1. Create new Heroku app
+2. Set environment variables
+3. Connect to GitHub
+4. Deploy from main branch
+
+### Deploy to Vercel
+1. Import project to Vercel
+2. Configure environment variables
+3. Deploy with automatic builds
+
+## 🔧 Configuration
+
+### Menu Configuration
+Edit `menu.json` to customize your restaurant menu:
+```json
+{
+  "restaurant_name": "Your Restaurant",
+  "categories": [
+    {
+      "name": "Main Course",
+      "items": [
+        {
+          "id": 1,
+          "name": "Chicken Biryani",
+          "price": 299,
+          "description": "Aromatic basmati rice with tender chicken"
+        }
+      ]
+    }
+  ]
+}
+```
+
+### Payment Configuration
+- Set your UPI ID in environment variables
+- Configure payment methods in `paymentService.js`
+- Customize payment messages for your region
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🆘 Support
+
+For support and questions:
+- Create an issue on GitHub
+- Check the documentation
+- Contact the maintainers
+
+## 🚀 Features Coming Soon
+
+- Multi-language support
+- Order scheduling
+- Delivery tracking
+- Customer feedback system
+- Analytics dashboard
+- Multi-restaurant support
+
+---
+
+Made with ❤️ for restaurant businesses to embrace digital ordering through WhatsApp. messages  
+- 🍽️ Menu displays
+- 📋 Order confirmations
+- 💡 Helpful suggestions
+
+## Database Schema 💾
+
+### Orders Collection
+```javascript
+{
+  orderId: String,
+  customerPhone: String,
+  customerName: String,
+  items: [{ menuId, name, quantity, price, total }],
+  totalAmount: Number,
+  status: String,
+  orderDate: Date,
+  deliveryAddress: String,
+  notes: String
+}
+```
+
+### Customers Collection
+```javascript
+{
+  phone: String,
+  name: String,
+  totalOrders: Number,
+  lastOrderDate: Date,
+  preferredItems: [{ menuId, name, orderCount }]
+}
+```
+
+## Troubleshooting 🔧
+
+### Common Issues
+
+1. **Webhook not receiving messages**
+   - Check ngrok tunnel is active
+   - Verify webhook URL in Twilio console
+   - Ensure server is running on correct port
+
+2. **Menu not loading**
+   - Verify `menu.json` file exists and is valid JSON
+   - Check file permissions
+
+3. **Orders not saving**
+   - Check MongoDB connection
+   - Verify environment variables
+   - Review server logs for errors
+
+### Debug Mode
+
+Enable detailed logging by setting:
+```bash
+NODE_ENV=development
+```
+
+## Deployment 🌐
+
+### Production Deployment
+
+1. **Environment Setup**:
+   - Use production MongoDB instance
+   - Set up proper webhook URL
+   - Configure environment variables
+
+2. **Hosting Options**:
+   - Heroku
+   - AWS EC2
+   - DigitalOcean
+   - Railway
+
+3. **Security**:
+   - Use HTTPS for webhook
+   - Validate Twilio signatures
+   - Implement rate limiting
+
+## Contributing 🤝
+
+1. Fork the repository
+2. Create feature branch: `git checkout -b feature-name`
+3. Commit changes: `git commit -m 'Add feature'`
+4. Push to branch: `git push origin feature-name`
+5. Submit pull request
+
+## License 📄
+
+MIT License - see LICENSE file for details
+
+## Support 💬
+
+For issues and questions:
+- Create GitHub issue
+- Check documentation
+- Review troubleshooting guide
+
+---
+
+**Happy ordering! 🍕📱**

@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Owner Dashboard - WhatsApp Orders</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+
+        .orders-section {
+            padding: 20px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .filters-container {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-group label {
+            font-weight: 500;
+            color: #2c3e50;
+            font-size: 0.9rem;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            min-width: 150px;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .download-section {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-download {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #f39c12;
+            color: white;
+        }
+
+        .order-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .order-id {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+
+        .order-status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-cancelled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .order-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .customer-info, .order-items, .payment-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+        }
+
+        .customer-info h4, .order-items h4 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .customer-location {
+            margin-top: 10px;
+            padding: 10px;
+            background: #e8f4fd;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+
+        .location-text {
+            color: #495057;
+            font-size: 0.9rem;
+        }
+
+        .urgency-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-left: 10px;
+        }
+
+        .urgency-high {
+            background: #ffe6e6;
+            color: #dc3545;
+        }
+
+        .urgency-medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .urgency-travel {
+            background: #e7f3ff;
+            color: #0056b3;
+        }
+
+        .items-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .items-list li {
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .items-list li:last-child {
+            border-bottom: none;
+        }
+
+        .order-total {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            text-align: right;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .order-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+
+        .no-orders {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .order-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .filter-buttons, .download-section {
+                flex-wrap: wrap;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 15px;
+            }
+
+            .filter-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍽️ Restaurant Dashboard</h1>
+            <p>WhatsApp Food Ordering System</p>
+        </div>
+
+        <div class="stats-grid" id="statsGrid">
+            <div class="loading">Loading statistics...</div>
+        </div>
+
+        <div class="orders-section">
+            <div class="section-header">
+                <h2>📋 Orders Management</h2>
+                <div class="download-section">
+                    <button class="btn btn-download" onclick="downloadOrders('csv')">📊 Download CSV</button>
+                    <button class="btn btn-download" onclick="downloadOrders('json')">📄 Download JSON</button>
+                </div>
+            </div>
+
+            <!-- Enhanced Filters -->
+            <div class="filters-container">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label>Order Status:</label>
+                        <select id="statusFilter" onchange="applyFilters()">
+                            <option value="pending">Pending Orders</option>
+                            <option value="completed">Completed Orders</option>
+                            <option value="cancelled">Cancelled Orders</option>
+                            <option value="today">Today's Orders</option>
+                            <option value="all">All Orders</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>From Date:</label>
+                        <input type="date" id="fromDate" onchange="applyFilters()">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>To Date:</label>
+                        <input type="date" id="toDate" onchange="applyFilters()">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Customer Name:</label>
+                        <input type="text" id="customerSearch" placeholder="Search customer..." onkeyup="applyFilters()">
+                    </div>
+                </div>
+                
+                <div class="filter-row">
+                    <div class="filter-buttons">
+                        <button class="btn btn-primary" onclick="resetFilters()">🔄 Reset Filters</button>
+                        <button class="btn btn-secondary" onclick="loadOrders('pending')">📋 Pending</button>
+                        <button class="btn btn-success" onclick="loadOrders('completed')">✅ Completed</button>
+                        <button class="btn btn-warning" onclick="loadOrders('cancelled')">❌ Cancelled</button>
+                        <button class="btn btn-primary" onclick="loadOrders('today')">📅 Today</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="ordersContainer">
+                <div class="loading">Loading orders...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentFilter = 'pending';
+        let allOrders = [];
+        let filteredOrders = [];
+
+        // Load dashboard data
+        async function loadDashboard() {
+            try {
+                const response = await fetch('/owner/dashboard');
+                const data = await response.json();
+                
+                displayStats(data.stats);
+                allOrders = data.pendingOrders; // Store all orders
+                applyFilters(); // Apply current filters
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                document.getElementById('statsGrid').innerHTML = '<div class="loading">Error loading data</div>';
+            }
+        }
+
+        // Display statistics
+        function displayStats(stats) {
+            const statsHtml = `
+                <div class="stat-card">
+                    <div class="stat-value">${stats.totalOrders}</div>
+                    <div class="stat-label">Total Orders</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${stats.pendingOrders}</div>
+                    <div class="stat-label">Pending Orders</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${stats.completedOrders}</div>
+                    <div class="stat-label">Completed Orders</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${stats.cancelledOrders || 0}</div>
+                    <div class="stat-label">Cancelled Orders</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">₹${parseFloat(stats.totalRevenue || 0).toFixed(2)}</div>
+                    <div class="stat-label">Total Revenue</div>
+                </div>
+            `;
+            document.getElementById('statsGrid').innerHTML = statsHtml;
+        }
+
+        // Load orders with enhanced filtering
+        async function loadOrders(filter) {
+            currentFilter = filter;
+            try {
+                const response = await fetch(`/owner/orders?filter=${filter}&limit=100`);
+                const data = await response.json();
+                
+                allOrders = data.orders || [];
+                applyFilters();
+            } catch (error) {
+                console.error('Error loading orders:', error);
+                document.getElementById('ordersContainer').innerHTML = '<div class="loading">Error loading orders</div>';
+            }
+        }
+
+        // Apply filters based on current filter selections
+        function applyFilters() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const fromDate = document.getElementById('fromDate').value;
+            const toDate = document.getElementById('toDate').value;
+            const customerSearch = document.getElementById('customerSearch').value.toLowerCase();
+
+            filteredOrders = allOrders.filter(order => {
+                // Status filter
+                if (statusFilter !== 'all' && statusFilter !== 'today') {
+                    if (order.status !== statusFilter) return false;
+                }
+
+                // Date filter
+                const orderDate = new Date(order.time);
+                if (fromDate && orderDate < new Date(fromDate)) return false;
+                if (toDate && orderDate > new Date(toDate + 'T23:59:59')) return false;
+
+                // Customer search
+                if (customerSearch && !order.customer.toLowerCase().includes(customerSearch)) return false;
+
+                return true;
+            });
+
+            displayOrders(filteredOrders);
+        }
+
+        // Reset all filters
+        function resetFilters() {
+            document.getElementById('statusFilter').value = 'pending';
+            document.getElementById('fromDate').value = '';
+            document.getElementById('toDate').value = '';
+            document.getElementById('customerSearch').value = '';
+            applyFilters();
+        }
+
+        // Get urgency level from location
+        function getUrgencyInfo(location) {
+            if (!location || location === 'Not specified') return null;
+            
+            const locationLower = location.toLowerCase();
+            if (locationLower.includes('hospital') || locationLower.includes('emergency')) {
+                return { level: 'high', text: '🚨 High Priority - Hospital/Emergency' };
+            }
+            if (locationLower.includes('station') || locationLower.includes('railway') || locationLower.includes('airport')) {
+                return { level: 'travel', text: '⚡ Urgent - Travel Location' };
+            }
+            if (locationLower.includes('office') && locationLower.includes('late')) {
+                return { level: 'medium', text: '🏢 Work Urgency - Late Office' };
+            }
+            return null;
+        }
+
+        // Get payment status display text
+        function getPaymentStatusText(status) {
+            const statusMap = {
+                'pending': '⏳ Pending',
+                'paid': '✅ Paid',
+                'cod': '🚚 Cash on Delivery',
+                'failed': '❌ Failed'
+            };
+            return statusMap[status] || '⏳ Pending';
+        }
+
+        // Get payment method display text
+        function getPaymentMethodText(method) {
+            const methodMap = {
+                'cod': 'Cash on Delivery',
+                'upi': 'UPI Payment',
+                'card': 'Card Payment',
+                'bank_transfer': 'Bank Transfer',
+                'wallet': 'Digital Wallet'
+            };
+            return methodMap[method] || 'Cash on Delivery';
+        }
+
+        // Display orders with enhanced location information
+        function displayOrders(orders) {
+            if (orders.length === 0) {
+                document.getElementById('ordersContainer').innerHTML = 
+                    '<div class="no-orders">📭 No orders found for the selected filters</div>';
+                return;
+            }
+
+            const ordersHtml = orders.map(order => {
+                const urgencyInfo = getUrgencyInfo(order.location);
+                const urgencyBadge = urgencyInfo ? 
+                    `<span class="urgency-badge urgency-${urgencyInfo.level}">${urgencyInfo.text}</span>` : '';
+
+                return `
+                    <div class="order-card">
+                        <div class="order-header">
+                            <div class="order-id">Order #${order.id.split('-').pop()}</div>
+                            <div class="order-status status-${order.status}">${order.status.toUpperCase()}</div>
+                        </div>
+                        
+                        <div class="order-details">
+                            <div class="customer-info">
+                                <h4>👤 Customer Information</h4>
+                                <p><strong>Name:</strong> ${order.customer}${urgencyBadge}</p>
+                                <p><strong>Phone:</strong> ${order.phone}</p>
+                                <p><strong>Time:</strong> ${new Date(order.time).toLocaleString()}</p>
+                                
+                                ${order.location && order.location !== 'Not specified' ? `
+                                    <div class="customer-location">
+                                        <strong>📍 Delivery Location:</strong>
+                                        <div class="location-text">${order.location}</div>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            
+                            <div class="payment-info">
+                                <h4>💳 Payment Information</h4>
+                                <p><strong>Status:</strong> 
+                                    <span class="payment-status payment-${order.paymentStatus || 'pending'}">
+                                        ${getPaymentStatusText(order.paymentStatus || 'pending')}
+                                    </span>
+                                </p>
+                                <p><strong>Method:</strong> ${getPaymentMethodText(order.paymentMethod || 'cod')}</p>
+                                ${order.paymentId ? `<p><strong>Payment ID:</strong> ${order.paymentId}</p>` : ''}
+                            </div>
+                            
+                            <div class="order-items">
+                                <h4>📝 Order Items</h4>
+                                <ul class="items-list">
+                                    ${order.items.map(item => `
+                                        <li>${item.quantity}x ${item.name} - ₹${parseFloat(item.total).toFixed(2)}</li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="order-total">
+                            Total: ₹${parseFloat(order.total).toFixed(2)}
+                        </div>
+                        
+                        ${order.status === 'pending' ? `
+                            <div class="order-actions">
+                                <button class="btn btn-success" onclick="updateOrderStatus('${order.id}', 'completed')">
+                                    ✅ Complete Order
+                                </button>
+                                <button class="btn btn-danger" onclick="updateOrderStatus('${order.id}', 'cancelled')">
+                                    ❌ Cancel Order
+                                </button>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('ordersContainer').innerHTML = ordersHtml;
+        }
+
+        // Update order status
+        async function updateOrderStatus(orderId, status) {
+            try {
+                const response = await fetch(`/owner/orders/${orderId}/status`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    // Reload current view
+                    loadDashboard();
+                    alert(`✅ Order ${status === 'completed' ? 'completed' : 'cancelled'} successfully!`);
+                } else {
+                    alert('Error updating order status: ' + (result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error updating order:', error);
+                alert('Error updating order status');
+            }
+        }
+
+        // Download orders data
+        function downloadOrders(format) {
+            if (filteredOrders.length === 0) {
+                alert('No orders to download');
+                return;
+            }
+
+            const ordersToDownload = filteredOrders.map(order => {
+                // Extract current location for clarity
+                let currentLocation = 'Not specified';
+                let homeLocation = '';
+                
+                if (order.location && order.location !== 'Not specified') {
+                    const currentMatch = order.location.match(/Current: ([^(]+)/);
+                    const homeMatch = order.location.match(/Home: ([^)]+)/);
+                    
+                    currentLocation = currentMatch ? currentMatch[1].trim() : order.location;
+                    homeLocation = homeMatch ? homeMatch[1].trim() : '';
+                }
+
+                // Calculate order value breakdown
+                const itemsBreakdown = order.items.map(item => 
+                    `${item.quantity}x ${item.name} (₹${parseFloat(item.total).toFixed(2)})`
+                ).join('; ');
+
+                return {
+                    orderNumber: order.id.split('-').pop(), // Short ID
+                    fullOrderId: order.id,
+                    customerName: order.customer,
+                    phoneNumber: order.phone,
+                    currentLocation: currentLocation,
+                    homeAddress: homeLocation,
+                    itemsOrdered: itemsBreakdown,
+                    itemCount: order.items.reduce((sum, item) => sum + item.quantity, 0),
+                    orderTotal: parseFloat(order.total).toFixed(2),
+                    orderStatus: order.status.toUpperCase(),
+                    orderDate: new Date(order.time).toLocaleDateString(),
+                    orderTime: new Date(order.time).toLocaleTimeString(),
+                    fullDateTime: new Date(order.time).toLocaleString()
+                };
+            });
+
+            if (format === 'csv') {
+                downloadCSV(ordersToDownload);
+            } else if (format === 'json') {
+                downloadJSON(ordersToDownload);
+            }
+        }
+
+        // Download as CSV with improved formatting
+        function downloadCSV(data) {
+            const headers = [
+                'Order Number',
+                'Full Order ID', 
+                'Customer Name',
+                'Phone Number',
+                'Current Location',
+                'Home Address',
+                'Items Ordered (with prices)',
+                'Total Items',
+                'Order Total (₹)',
+                'Status',
+                'Order Date',
+                'Order Time',
+                'Complete Date & Time'
+            ];
+            
+            // Function to escape CSV values properly
+            function escapeCsvValue(value) {
+                if (value === null || value === undefined) return '';
+                const stringValue = String(value);
+                // If value contains comma, quote, or newline, wrap in quotes and escape quotes
+                if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+                    return `"${stringValue.replace(/"/g, '""')}"`;
+                }
+                return stringValue;
+            }
+            
+            const csvRows = [
+                headers.join(','),
+                ...data.map(order => [
+                    escapeCsvValue(order.orderNumber),
+                    escapeCsvValue(order.fullOrderId),
+                    escapeCsvValue(order.customerName),
+                    escapeCsvValue(order.phoneNumber),
+                    escapeCsvValue(order.currentLocation),
+                    escapeCsvValue(order.homeAddress),
+                    escapeCsvValue(order.itemsOrdered),
+                    escapeCsvValue(order.itemCount),
+                    escapeCsvValue(order.orderTotal),
+                    escapeCsvValue(order.orderStatus),
+                    escapeCsvValue(order.orderDate),
+                    escapeCsvValue(order.orderTime),
+                    escapeCsvValue(order.fullDateTime)
+                ].join(','))
+            ];
+            
+            const csvContent = csvRows.join('\n');
+            const filename = `Restaurant_Orders_${new Date().toISOString().split('T')[0]}.csv`;
+            downloadFile(csvContent, filename, 'text/csv');
+        }
+
+        // Download as JSON with improved structure
+        function downloadJSON(data) {
+            const jsonData = {
+                exportInfo: {
+                    exportDate: new Date().toISOString(),
+                    totalOrders: data.length,
+                    restaurantName: "WhatsApp Food Ordering Restaurant",
+                    generatedBy: "Enhanced Restaurant Dashboard"
+                },
+                orders: data.map(order => ({
+                    orderInfo: {
+                        orderNumber: order.orderNumber,
+                        fullOrderId: order.fullOrderId,
+                        status: order.orderStatus,
+                        orderDate: order.orderDate,
+                        orderTime: order.orderTime
+                    },
+                    customer: {
+                        name: order.customerName,
+                        phone: order.phoneNumber,
+                        currentLocation: order.currentLocation,
+                        homeAddress: order.homeAddress
+                    },
+                    orderDetails: {
+                        items: order.itemsOrdered,
+                        totalItems: order.itemCount,
+                        totalAmount: order.orderTotal,
+                        currency: "INR"
+                    }
+                }))
+            };
+            
+            const jsonContent = JSON.stringify(jsonData, null, 2);
+            const filename = `Restaurant_Orders_${new Date().toISOString().split('T')[0]}.json`;
+            downloadFile(jsonContent, filename, 'application/json');
+        }
+
+        // Helper function to download file
+        function downloadFile(content, filename, contentType) {
+            const blob = new Blob([content], { type: contentType });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        // Set default date filters to today
+        function setDefaultDates() {
+            const today = new Date().toISOString().split('T')[0];
+            // Don't set default dates to allow viewing all orders by default
+        }
+
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            loadDashboard();
+        }, 30000);
+
+        // Load initial data
+        setDefaultDates();
+        loadDashboard();
+    </script>
+</body>
+</html>
