@@ -1,39 +1,61 @@
-# WhatsApp Food Ordering Bot 🍽️📱
+# 🍽️ WhatsApp Restaurant Ordering System
 
-A comprehensive WhatsApp ChatBot built with Node.js and Express that handles food orders through Twilio's WhatsApp API. Perfect for restaurants wanting to automate their ordering process!
+A comprehensive WhatsApp-based restaurant ordering system built with Node.js, Express, and Twilio. This system provides a complete ordering experience through WhatsApp messages, including customer onboarding, menu browsing, order placement, payment processing, and order management.
 
-## Features ✨
+## 🌟 Key Features
 
-- 🔗 **WhatsApp Integration**: Connect via Twilio WhatsApp API
-- 📋 **Dynamic Menu**: Daily menu from JSON file with emojis
-- 🛒 **Order Processing**: Accept and process food orders
-- 💾 **Data Storage**: MySQL database with Sequelize ORM
-- 📧 **Notifications**: Confirm orders to customers and notify owners
-- 🤖 **Smart Parsing**: Understand natural language orders
-- 🔍 **Search**: Find menu items by name or category
-- 📊 **Status Tracking**: Real-time order status updates
-- 💡 **Help System**: Built-in help and command assistance
+### 👥 **Customer Experience**
+- **Smart Onboarding**: Automatic name and location collection for new customers
+- **Dynamic Menu Display**: Menu with categories, prices in Indian Rupees (₹), and emojis
+- **Flexible Ordering**: Multiple order formats supported (by name, ID, or number)
+- **Payment Options**: Cash on Delivery (COD) and UPI payments with QR codes
+- **Real-time Tracking**: Order status updates and delivery notifications
+- **Location Management**: Session-based current location and saved default location
 
-## Quick Start 🚀
+### 🏪 **Restaurant Owner Management**
+- **Order Dashboard**: Web-based dashboard with payment filtering
+- **WhatsApp Commands**: Complete order management through WhatsApp
+- **Menu Management**: Add, edit, delete, and toggle menu items via WhatsApp
+- **Payment Tracking**: Manual payment confirmation with short codes
+- **Analytics**: Daily statistics and order summaries
+- **Smart Order IDs**: Use last 4 digits for quick order operations
 
-### Prerequisites
+### 💳 **Payment System**
+- **UPI Integration**: Instant payments with QR codes and deep links
+- **COD Support**: Cash on delivery with payment tracking
+- **Payment Confirmation**: Customer and owner payment verification
+- **Short Code Commands**: Quick payment confirmation using order ID endings
+- **Payment Status Tracking**: Real-time payment status updates
+
+## 🛠️ Technical Stack
+
+- **Backend**: Node.js, Express.js
+- **Database**: MySQL with Sequelize ORM
+- **WhatsApp API**: Twilio WhatsApp Business API
+- **Payment Processing**: UPI integration for Indian market
+- **Frontend**: Responsive HTML/CSS/JavaScript dashboard
+
+## 📋 Prerequisites
 
 - Node.js (v14 or higher)
-- Twilio Account with WhatsApp API access
 - MySQL database
+- Twilio WhatsApp Business API account
 - ngrok (for local development)
+- UPI ID for payment processing
 
-### Installation
+## ⚡ Quick Setup
 
-1. **Clone and install dependencies:**
+### 1. Clone and Install
 ```bash
-cd WhatsOrder
+git clone https://github.com/yourusername/whatsapp-restaurant-ordering.git
+cd whatsapp-restaurant-ordering
 npm install
 ```
 
-2. **Configure environment variables:**
-Update `.env` file with your credentials:
+### 2. Environment Configuration
+Create `.env` file:
 ```env
+PORT=3000
 TWILIO_ACCOUNT_SID=your_twilio_account_sid
 TWILIO_AUTH_TOKEN=your_twilio_auth_token
 TWILIO_PHONE_NUMBER=whatsapp:+14155238886
@@ -43,532 +65,652 @@ MYSQL_PORT=3306
 MYSQL_USER=your_mysql_user
 MYSQL_PASSWORD=your_mysql_password
 MYSQL_DATABASE=whatsorder
-WEBHOOK_URL=https://your-ngrok-url.ngrok.io/webhook
-UPI_ID=your_restaurant_upi_id
-RESTAURANT_NAME=Your Restaurant Name
+WEBHOOK_URL=https://your-ngrok-url.ngrok.io
+UPI_ID=restaurant@paytm
+RESTAURANT_NAME=Delicious Bites
 ```
 
-3. **Start the server:**
+### 3. Database Setup
 ```bash
-npm run dev
+# Create MySQL database
+mysql -u root -p -e "CREATE DATABASE whatsorder;"
+
+# Tables will be auto-created on first run
+npm start
 ```
 
-4. **Set up ngrok for local development:**
+### 4. Webhook Configuration
 ```bash
+# Start ngrok tunnel
 ngrok http 3000
+
+# Configure Twilio webhook URL:
+# https://your-ngrok-url.ngrok.io/webhook
 ```
 
-5. **Configure Twilio webhook:**
-- Go to Twilio Console > WhatsApp > Sandbox
-- Set webhook URL to: `https://your-ngrok-url.ngrok.io/webhook`
+## 🚀 Complete User Journey
 
-## Usage 📱
+### 📱 **Customer Experience Flow**
 
-### Customer Commands
+#### **1. First-Time Customer Onboarding**
+```
+Customer: Hi
+Bot: 🍽️ Welcome to Delicious Bites!
+     
+     👋 We'd love to serve you! To get started:
+     📝 Could you please tell us your name?
 
-- **View Menu**: Send `menu`, `hi`, or `hello`
-- **Place Order**: 
-  - `Order 2 Chicken Biryani` (single item)
-  - `Order 1 item 3` (using menu item number)
-  - `Order 3 #1` (using menu ID)
-  - `Order 2 Chicken Biryani, 1 Veg Pulao, 3 Naan` (multiple items)
-- **Check Status**: Send `status` or `my orders`
-- **Get Help**: Send `help`
-- **Search**: `Find chicken` or `Do you have biryani?`
+Customer: Rahul Kumar
+Bot: ✅ Hi Rahul! Nice to meet you!
+     
+     📍 To provide the best service, could you share your location?
+     💡 This helps us calculate delivery time and confirm our service area.
+     
+     📝 Just type your address (e.g., "MG Road, Bangalore")
 
-### Example Conversations
+Customer: JP Nagar, Bangalore  
+Bot: 📍 Perfect! Location saved: JP Nagar, Bangalore
+     
+     🎉 You're all set! Here's our delicious menu:
+     
+     🍴 **Main Course**
+     🍛 1. Chicken Biryani - ₹299
+        Aromatic basmati rice with tender chicken pieces
+     🍛 2. Mughalai Biryani - ₹180
+        Delicious mughalai biryani
+     🍚 3. Vegetable Pulao - ₹199
+        Fragrant rice with mixed vegetables
+     
+     🍞 **Breads**
+     🫓 4. Naan Bread - ₹49
+        Fresh baked traditional bread
+     🫓 5. Pulka - ₹15
+        Delicious pulka
+     
+     📝 To order, type: "Order [quantity] [item name]"
+     💡 Example: "Order 2 Chicken Biryani"
+```
 
+#### **2. Returning Customer Experience**
 ```
 Customer: hi
-Bot: 🍽️ Delicious Bites - Today's Menu
-     📅 Date: 2025-07-16
+Bot: 👋 Hi Rahul! 📍 JP Nagar, Bangalore
      
-     Main Course 🍴
-     🍛 1. Chicken Biryani - $12.99
-        Aromatic basmati rice with tender chicken pieces
-     ...
+     ⏰ Are you at your usual location or somewhere else today?
+     
+     📝 Reply with:
+     • "same" - for JP Nagar, Bangalore
+     • Or type your current location
 
-Customer: Order 2 Chicken Biryani
-Bot: ✅ Order placed successfully!
-     📋 Order ID: ORD-1642345678-A1B2
-     💰 Total: $25.98
-     🕐 We'll notify you when your order is ready!
+Customer: same
+Bot: 📍 Great! Delivering to JP Nagar, Bangalore
+     
+     🍽️ Here's today's menu:
+     [Menu display...]
 ```
 
-## API Endpoints 🛠️
+#### **3. Complete Order Process**
+```
+Customer: Order 2 Chicken Biryani, 1 Naan
+Bot: 🛒 Excellent choice! Your order:
+     
+     📋 **Order Summary:**
+     • 2x Chicken Biryani - ₹598
+     • 1x Naan Bread - ₹49
+     💰 **Total: ₹647**
+     
+     ✅ Order ID: ORD-1721234567-A7H4
+     👤 Customer: Rahul Kumar
+     📍 Delivery: JP Nagar, Bangalore
+     
+     💳 **Choose Payment Method:**
+     1️⃣ Cash on Delivery (COD) - Reply "pay cod"
+     2️⃣ UPI Payment (Instant) - Reply "pay upi"
 
-### Webhook
-- `POST /webhook` - Handle incoming WhatsApp messages
+Customer: pay upi
+Bot: 📱 **UPI Payment for Order #ORD-1721234567-A7H4**
+     
+     💰 Amount: ₹647
+     
+     **Payment Options:**
+     
+     🔗 **Quick Pay Link:**
+     upi://pay?pa=restaurant@paytm&am=647&tn=Order-A7H4
+     
+     📸 **QR Code:**
+     https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=...
+     
+     💳 **Manual Transfer:**
+     UPI ID: restaurant@paytm
+     Amount: ₹647
+     Reference: ORD-1721234567-A7H4
+     
+     ✅ After payment, send: "paid [transaction_id]"
+     📞 Example: "paid TXN987654321"
 
-### Management
+Customer: paid TXN987654321
+Bot: ✅ **Payment Confirmed!**
+     
+     📋 Order #ORD-1721234567-A7H4
+     💰 Amount: ₹647 - PAID ✅
+     🆔 Transaction ID: TXN987654321
+     
+     🎉 Payment received successfully!
+     👨‍🍳 Your order is now being prepared.
+     
+     📱 We'll notify you when it's ready for delivery!
+     🕐 Estimated time: 30-45 minutes
+```
+
+#### **4. Order Status Tracking**
+```
+Customer: status
+Bot: 📋 **Your Recent Orders:**
+     
+     **Order #A7H4** - ₹647 ✅ PAID
+     👤 Rahul Kumar
+     📍 JP Nagar, Bangalore
+     🍛 2x Chicken Biryani, 1x Naan Bread
+     📊 Status: Preparing 👨‍🍳
+     🕐 ETA: 25 minutes
+     
+     💡 Need help? Type "help"
+```
+
+### 👑 **Restaurant Owner Experience**
+
+#### **1. Order Management**
+```
+Owner: orders
+Bot: 📋 **PENDING ORDERS (3)**
+     
+     1️⃣ (A7H4) Rahul Kumar 📍 JP Nagar ✅
+     ₹647 • 2x Chicken Biryani, 1x Naan Bread
+     
+     2️⃣ (B2K9) Priya Singh 📍 MG Road ⏳
+     ₹425 • 1x Vegetable Pulao, 2x Naan Bread
+     
+     3️⃣ (C5M3) Ahmed Khan 📍 Whitefield 🚚
+     ₹380 • 1x Mughalai Biryani, 1x Pulka
+     
+     🚀 **Complete:** "done 1" or "complete A7H4"
+     📋 **More:** "orders today" • "stats"
+
+Owner: done 1
+Bot: ✅ **Order #ORD-1721234567-A7H4 marked as COMPLETED!**
+     
+     👤 Customer: Rahul Kumar
+     💰 Amount: ₹647
+     📱 Customer notified: +919876543210
+     
+     🎉 Great job completing this order!
+     
+     💡 **Quick tip:** Use "done 2" for next order or "complete B2K9"!
+```
+
+#### **2. Payment Management**
+```
+Owner: paid A7H4
+Bot: ✅ **Payment confirmed for Order #ORD-1721234567-A7H4**
+     
+     👤 Customer: Rahul Kumar  
+     💰 Amount: ₹647
+     💳 Method: UPI
+     📱 Customer notified: +919876543210
+     
+     Payment status updated to PAID.
+
+Owner: orders today
+Bot: 📊 **TODAY'S ORDERS (12)**
+     
+     📈 **Summary:**
+     • Total: 12 orders
+     • Pending: 2
+     • Completed: 8  
+     • Cancelled: 2
+     • Revenue: ₹4,580
+     
+     💰 **Payments:**
+     • Paid: 9 orders (₹3,890)
+     • Pending: 3 orders (₹690)
+     
+     📋 **Commands:** "orders" • "stats" • "complete [id]"
+```
+
+#### **3. Menu Management**
+```
+Owner: menu manage
+Bot: 🍽️ **MENU MANAGEMENT**
+     🏪 Delicious Bites
+     📅 Last Updated: 2025-07-17
+     📊 12/15 items available
+     
+     📋 **Current Menu:**
+     1. 🍛 Chicken Biryani - ₹299 ✅
+     2. 🍖 Mutton Karahi - ₹399 ✅
+     3. 🍗 Chicken Tikka - ₹249 ✅
+     4. 🍚 Vegetable Pulao - ₹199 ✅
+     5. 🫓 Naan Bread - ₹49 ✅
+     
+     🔧 **Commands:**
+     • **add item [name] [price]** - Add new item
+     • **edit item [id] price [amount]** - Change price
+     • **toggle item [id]** - Enable/disable
+     • **delete item [id]** - Remove item
+
+Owner: add item Samosa 25 Crispy fried pastry with spiced filling
+Bot: ✅ **Menu item added successfully!**
+     
+     📝 **Item Details:**
+     • ID: 16
+     • Name: Samosa
+     • Price: ₹25
+     • Category: Appetizer
+     • Description: Crispy fried pastry with spiced filling
+     • Status: Available
+
+Owner: edit item 1 price 320
+Bot: ✅ **Menu item updated successfully!**
+     
+     📝 **Updated Item:**
+     • ID: 1
+     • Name: Chicken Biryani  
+     • Price: ₹320 (was ₹299)
+     • Category: Main Course
+     • Status: Available
+```
+
+## 📱 Supported Order Formats
+
+### **Multiple Ways to Order**
+```
+# By item name
+"Order 2 Chicken Biryani"
+"Order 1 Naan"
+
+# By item number  
+"Order 2 item 1"
+"Order 3 item 5"
+
+# By item ID with #
+"Order 2 #1"
+"Order 1 #5"
+
+# Multiple items in one message
+"Order 2 Chicken Biryani, 1 Naan, 3 Samosa"
+"Order 1 item 1, 2 item 3, 1 item 5"
+
+# Natural language
+"I want 2 Chicken Biryani and 1 Naan"
+"Get me 1 Vegetable Pulao"
+```
+
+## 🔧 Owner Command Reference
+
+### **Order Management**
+- `orders` - View pending orders (numbered list)
+- `orders today` - All today's orders
+- `orders completed` - View completed orders
+- `complete 1` or `done 1` - Complete first order
+- `complete A7H4` - Complete order with short ID
+- `cancel order A7H4` - Cancel an order
+- `paid A7H4` - Mark order as paid
+- `stats` - Daily statistics
+
+### **Menu Management**
+- `menu manage` - View menu management
+- `add item Samosa 25` - Add new item
+- `add item Tea 15 Hot masala tea` - Add with description
+- `edit item 1 price 320` - Change price
+- `edit item Samosa name Crispy Samosa` - Change name
+- `delete item 5` - Remove item
+- `toggle item 3` - Enable/disable item
+
+### **Quick Commands**
+- `done 1` - Complete first pending order
+- `paid A7H4` - Confirm payment for order
+- `complete B2K9` - Complete specific order
+- All commands work with short IDs (last 4 characters)
+
+## 🌐 Dashboard Features
+
+Access the web dashboard at: `http://localhost:3000/dashboard`
+
+### **Dashboard Capabilities**
+- **📋 Order Filters**: Pending, Completed, Paid, Cancelled orders
+- **💰 Payment Management**: Mark orders as paid with one click
+- **📊 Real-time Updates**: Live order status and payment tracking
+- **📱 Mobile Responsive**: Works on all devices
+- **🔍 Search & Filter**: Filter by customer, date, payment status
+- **📈 Analytics**: Revenue tracking and order statistics
+
+### **Payment Status Indicators**
+- ✅ **Paid** - Payment confirmed
+- ⏳ **Pending** - Payment not yet received
+- 🚚 **COD** - Cash on delivery
+- ❌ **Failed** - Payment failed
+
+## 🎯 API Endpoints
+
+### **Core Endpoints**
+- `POST /webhook` - WhatsApp message webhook
 - `GET /health` - Health check
 - `GET /menu` - Get current menu
-- `GET /orders/daily-summary` - Daily orders summary
+- `GET /dashboard` - Owner dashboard
+
+### **Order Management**
+- `GET /orders/daily-summary` - Daily order summary
 - `POST /orders/:orderId/status` - Update order status
-- `POST /send-welcome` - Send welcome message
+- `GET /owner/orders` - Get filtered orders
+- `POST /owner/orders/:orderId/payment` - Mark as paid
 
-### Owner Dashboard
-- `GET /dashboard` - Basic owner dashboard
-- `GET /enhanced-dashboard` - Enhanced dashboard with payment filters
-- `GET /owner/orders` - Get filtered orders (supports `?filter=paid` for paid orders)
-- `POST /owner/orders/:orderId/status` - Update order status
-- `POST /owner/orders/:orderId/payment` - Mark order as paid (dashboard)
+### **Owner Dashboard API**
+- `GET /owner/dashboard` - Dashboard data
+- `GET /owner/orders?filter=paid` - Filter orders
+- `POST /owner/orders/:orderId/status` - Update status
 
-## Project Structure 📁
+## 📁 Project Structure
 
 ```
-WhatsOrder/
-├── server.js                 # Main server file
-├── package.json              # Dependencies
-├── .env                      # Environment variables
-├── menu.json                 # Daily menu data
+whatsapp-restaurant-ordering/
+├── server.js                          # Main application server
+├── package.json                       # Dependencies and scripts
+├── .env                               # Environment configuration
+├── menu.json                          # Restaurant menu data
 ├── models/
-│   └── database.js           # MySQL models with Sequelize
+│   └── database.js                    # Database models (Customer, Order)
 ├── services/
-│   ├── menuService.js        # Menu operations
-│   ├── orderService.js       # Order management
-│   └── whatsappService.js    # WhatsApp messaging
-└── utils/
-    ├── messageParser.js      # Message parsing logic
-    └── responseTemplates.js  # Response templates
+│   ├── whatsappService.js            # Twilio WhatsApp integration
+│   ├── menuService.js                # Menu operations and display
+│   ├── orderService.js               # Order processing and management
+│   ├── customerService.js            # Customer onboarding and data
+│   ├── paymentService.js             # Payment processing (UPI/COD)
+│   └── menuManagementService.js      # Menu item CRUD operations
+├── utils/
+│   ├── messageParser.js              # WhatsApp message parsing and intents
+│   └── responseTemplates.js          # Message response templates
+└── public/
+    └── enhanced-owner-dashboard.html  # Web dashboard interface
 ```
 
-## Menu Configuration 🍽️
+## 🛠️ Menu Configuration
 
-Update `menu.json` daily with your restaurant's offerings:
+Update `menu.json` to customize your restaurant's offerings:
 
 ```json
 {
-  "date": "2025-07-16",
-  "restaurant_name": "Your Restaurant",
+  "date": "2025-07-17",
+  "restaurant_name": "Delicious Bites",
   "menu": [
     {
       "id": 1,
       "name": "Chicken Biryani",
-      "description": "Aromatic basmati rice with tender chicken",
-      "price": 12.99,
+      "description": "Aromatic basmati rice with tender chicken pieces",
+      "price": 299,
       "category": "Main Course",
       "available": true,
       "emoji": "🍛"
+    },
+    {
+      "id": 2,
+      "name": "Vegetable Pulao",
+      "description": "Fragrant rice with mixed vegetables", 
+      "price": 199,
+      "category": "Main Course",
+      "available": true,
+      "emoji": "🍚"
     }
   ]
 }
 ```
 
-## Order Management 📊
+## 🔧 Advanced Configuration
 
-### For Restaurant Owners
+### **Payment Methods**
+```javascript
+// In paymentService.js
+this.upiId = process.env.UPI_ID; // Your UPI ID
+this.restaurantName = process.env.RESTAURANT_NAME;
 
-1. **Receive Notifications**: Get WhatsApp alerts for new orders
-2. **Update Status**: Use API endpoints to update order status
-3. **Daily Reports**: Check `/orders/daily-summary` for insights
-
-### Order Status Flow
-- `pending` → `confirmed` → `preparing` → `ready` → `delivered`
-
-## Customization 🎨
-
-### Adding New Features
-
-1. **Custom Commands**: Add new intents in `messageParser.js`
-2. **Response Templates**: Modify `responseTemplates.js`
-3. **Menu Categories**: Update menu structure in `menu.json`
-4. **Order Workflow**: Customize order processing in `orderService.js`
-
-### Message Templates
-
-All responses use emojis and structured formatting for better readability:
-- ✅ Success messages
-- ❌ # WhatsApp Restaurant Ordering System
-
-A complete WhatsApp-based restaurant ordering system built with Node.js, Express, and Twilio. Customers can place orders, make payments (COD/UPI), and track their orders through WhatsApp messages.
-
-## 🚀 Features
-
-### For Customers
-- **WhatsApp Ordering**: Place orders directly through WhatsApp messages
-- **Smart Menu**: View menu with categories and prices
-- **Order Tracking**: Real-time order status updates
-- **Payment Options**: Cash on Delivery (COD) and UPI payments
-- **Location-based Delivery**: Address management for delivery
-
-### For Restaurant Owners
-- **Order Management**: Receive and manage orders through WhatsApp
-- **Dashboard**: Web-based dashboard for order tracking with paid orders filter
-- **Payment Tracking**: Monitor payment status and methods with manual confirmation
-- **Customer Management**: Track customer information and order history
-- **Short Code Commands**: Use last 4 digits of order ID for quick actions
-
-### Payment System
-- **Cash on Delivery (COD)**: Pay when food is delivered
-- **UPI Payments**: Instant payments with UPI links and QR codes
-- **Payment Confirmation**: Automated payment status tracking
-- **Owner Payment Management**: Mark orders as paid via WhatsApp or dashboard
-- **Short Code Support**: Use last 4 digits of order ID for convenience
-
-## 🛠️ Tech Stack
-
-- **Backend**: Node.js, Express.js
-- **Database**: MySQL with Sequelize ORM
-- **WhatsApp API**: Twilio WhatsApp Business API
-- **Payment**: UPI integration for Indian payments
-- **Frontend**: HTML/CSS/JavaScript dashboard
-
-## 📋 Prerequisites
-
-- Node.js (v14 or higher)
-- MySQL database
-- Twilio account with WhatsApp Business API
-- Ngrok for webhook tunneling (development)
-
-## ⚙️ Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/whatsapp-restaurant-ordering.git
-   cd whatsapp-restaurant-ordering
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Set up environment variables**
-   ```bash
-   cp .env.example .env
-   ```
-   
-   Edit `.env` with your configuration:
-   ```env
-   PORT=3000
-   TWILIO_ACCOUNT_SID=your_twilio_account_sid
-   TWILIO_AUTH_TOKEN=your_twilio_auth_token
-   TWILIO_PHONE_NUMBER=whatsapp:+your_twilio_whatsapp_number
-   RESTAURANT_OWNER_PHONE=whatsapp:+your_owner_phone
-   MYSQL_HOST=localhost
-   MYSQL_PORT=3306
-   MYSQL_USER=your_mysql_user
-   MYSQL_PASSWORD=your_mysql_password
-   MYSQL_DATABASE=whatsorder
-   WEBHOOK_URL=your_ngrok_url
-   UPI_ID=your_restaurant_upi_id
-   RESTAURANT_NAME=Your Restaurant Name
-   ```
-
-4. **Set up the database**
-   ```bash
-   # Create MySQL database
-   mysql -u root -p -e "CREATE DATABASE whatsorder;"
-   
-   # Import database structure (optional - tables are auto-created)
-   mysql -u root -p whatsorder < database-setup.sql
-   
-   # Or run the application (tables will be created automatically)
-   npm start
-   ```
-   
-   *Note: Check `database-setup.sql` file for complete database schema and table structures.*
-
-5. **Configure Twilio Webhook**
-   - Go to Twilio Console → Phone Numbers → Your WhatsApp Number
-   - Set webhook URL: `https://your-ngrok-url.ngrok.io/webhook`
-
-## 🚀 Usage
-
-### Starting the Server
-```bash
-npm start
+// Supported payment methods
+const methods = {
+  'upi': 'UPI Payment',
+  'cod': 'Cash on Delivery'
+};
 ```
 
-The server will start on port 3000 (or your configured PORT).
-
-### Customer Commands (WhatsApp)
-- `menu` - View restaurant menu
-- `Order 2 Chicken Biryani` - Place single item order
-- `Order 2 Chicken Biryani, 1 Veg Pulao, 3 Naan` - Place multiple items order
-- `pay cod` - Select Cash on Delivery
-- `pay upi` - Get UPI payment details
-- `paid TXN123456` - Confirm UPI payment
-- `payment help` - View payment options
-- `status` - Check order status
-
-### Owner Commands (WhatsApp)
-- `orders` - View pending orders
-- `complete [order_id]` - Mark order as complete (use full ID or last 4 digits)
-- `paid [order_id]` - Mark specific order as paid (use full ID or last 4 digits)  
-- `stats` - View daily statistics
-
-**Examples:**
-- `paid ABCD` - Mark order ending in ABCD as paid
-- `complete 1234` - Complete order ending in 1234
-- `cancel WXYZ` - Cancel order ending in WXYZ
-- `paid ORD-1234567890-ABCD` - Full order ID also works
-
-**Payment Workflow:**
-- For **COD orders**: Use `paid [last4digits]` when cash is received
-- For **UPI orders**: Use `paid [last4digits]` to manually confirm if needed
-- Order completion (`complete`) is separate from payment confirmation
-- Both COD and UPI orders can be completed before payment confirmation
-
-### Dashboard
-Access the owner dashboard at: `http://localhost:3000/dashboard`
-
-**Dashboard Features:**
-- **📋 Pending Orders** - View all pending orders
-- **✅ Completed Orders** - View completed orders  
-- **💰 Paid Orders** - Filter orders by payment status
-- **❌ Cancelled Orders** - View cancelled orders
-- **📅 Today's Orders** - Daily order overview
-- **Complete Order Button** - Mark orders as ready (separate from payment)
-- **Mark as Paid Button** - Manually confirm payment received
-- **Payment Status Display** - Clear indication of UPI vs COD payments
-
-## 📱 Payment Methods
-
-### Cash on Delivery (COD)
-- Customers select COD option
-- Payment collected on delivery
-- Owner can mark as paid using `paid [order_id]` command
-- Automatic order confirmation
-
-### UPI Payments
-- Generate UPI payment links
-- QR code for easy scanning
-- Payment confirmation with transaction ID
-- Automatic payment status update to "paid"
-- Support for all major UPI apps (PhonePe, Google Pay, Paytm)
-- Owner can manually confirm if needed using `paid [order_id]` command
-
-### Payment Management
-- **Separate workflow**: Order completion ≠ Payment confirmation
-- **COD orders**: Can be marked "complete" without payment confirmation
-- **UPI orders**: Automatically marked as paid when customer confirms
-- **Manual override**: Owner can mark any order as paid using short commands
-- **Dashboard control**: "Mark as Paid" button for manual confirmation
-
-## 🏗️ Project Structure
-
-```
-whatsapp-restaurant-ordering/
-├── server.js                 # Main server file
-├── package.json              # Dependencies and scripts
-├── .env.example              # Environment variables template
-├── menu.json                 # Restaurant menu configuration
-├── database-setup.sql        # MySQL database schema
-├── models/
-│   └── database.js           # Database models and connection
-├── services/
-│   ├── whatsappService.js    # WhatsApp messaging service
-│   ├── menuService.js        # Menu management service
-│   ├── orderService.js       # Order processing service
-│   ├── customerService.js    # Customer management service
-│   └── paymentService.js     # Payment processing service
-├── utils/
-│   ├── messageParser.js      # WhatsApp message parsing
-│   └── responseTemplates.js  # Message templates
-└── public/
-    └── enhanced-owner-dashboard.html  # Owner dashboard
+### **Customer Data Management**
+```javascript
+// Database schema for customers
+Customer: {
+  phone: String,           // WhatsApp phone number
+  name: String,           // Customer name
+  location: String,       // Default delivery location
+  currentLocation: String, // Current session location
+  totalOrders: Number,    // Total order count
+  sessionActive: Boolean, // Current session status
+  lastLocationUpdate: Date
+}
 ```
 
-## 🌐 Deployment
+### **Order Tracking**
+```javascript
+// Order statuses
+const statuses = [
+  'pending',     // Order placed, awaiting confirmation
+  'confirmed',   // Order confirmed by restaurant
+  'preparing',   // Food being prepared
+  'ready',       // Order ready for delivery
+  'completed',   // Order completed/delivered
+  'cancelled'    // Order cancelled
+];
 
-### Deploy to Railway
-1. Fork this repository
+// Payment statuses  
+const paymentStatuses = [
+  'pending',     // Payment not received
+  'paid',        // Payment confirmed
+  'cod',         // Cash on delivery
+  'failed'       // Payment failed
+];
+```
+
+## 🚀 Deployment Options
+
+### **Railway Deployment**
+1. Fork repository to GitHub
 2. Connect to Railway
-3. Add environment variables
+3. Set environment variables
 4. Deploy automatically
 
-### Deploy to Heroku
-1. Create new Heroku app
-2. Set environment variables
-3. Connect to GitHub
-4. Deploy from main branch
+### **Heroku Deployment**
+```bash
+# Create Heroku app
+heroku create your-app-name
 
-### Deploy to Vercel
-1. Import project to Vercel
-2. Configure environment variables
-3. Deploy with automatic builds
+# Set environment variables
+heroku config:set TWILIO_ACCOUNT_SID=your_sid
+heroku config:set TWILIO_AUTH_TOKEN=your_token
+heroku config:set MYSQL_HOST=your_db_host
 
-## 🔧 Configuration
+# Deploy
+git push heroku main
+```
 
-### Menu Configuration
-Edit `menu.json` to customize your restaurant menu:
-```json
+### **VPS/Server Deployment**
+```bash
+# Install PM2 for process management
+npm install -g pm2
+
+# Start application
+pm2 start server.js --name "whatsapp-restaurant"
+
+# Setup auto-restart
+pm2 startup
+pm2 save
+```
+
+## 🔍 Troubleshooting
+
+### **Common Issues**
+
+#### **1. Webhook Not Receiving Messages**
+```bash
+# Check ngrok tunnel is active
+ngrok http 3000
+
+# Verify webhook URL in Twilio console
+# URL format: https://your-ngrok-url.ngrok.io/webhook
+```
+
+#### **2. Database Connection Issues**
+```bash
+# Test MySQL connection
+mysql -u your_user -p -h localhost
+
+# Verify environment variables
+echo $MYSQL_HOST
+echo $MYSQL_USER
+```
+
+#### **3. Payment Commands Not Working**
+- Ensure owner phone matches `RESTAURANT_OWNER_PHONE` in `.env`
+- Use exact format: `paid A7H4` (last 4 digits of order ID)  
+- Check order exists first: `orders`
+- Verify order ID format in logs
+
+#### **4. Menu Not Loading**
+```bash
+# Verify menu.json exists and is valid JSON
+cat menu.json | jq .
+
+# Check file permissions
+ls -la menu.json
+```
+
+### **Debug Mode**
+```bash
+# Enable detailed logging
+NODE_ENV=development npm start
+
+# Use debug endpoint
+curl -X POST http://localhost:3000/debug/message \
+  -H "Content-Type: application/json" \
+  -d '{"message": "hi", "phone": "+1234567890"}'
+```
+
+## 📊 Performance & Scaling
+
+### **Database Optimization**
+- Index on `orderId`, `customerPhone`, `createdAt`
+- Regular cleanup of old orders
+- Connection pooling enabled
+
+### **Message Processing**
+- Asynchronous message handling
+- TwiML response under 10 seconds
+- Error recovery and retry logic
+
+### **Monitoring**
+- Health check endpoint: `/health`
+- Order processing logs
+- Payment transaction logs
+- WhatsApp delivery status tracking
+
+## 🔐 Security Best Practices
+
+### **Environment Security**
+```bash
+# Secure environment variables
+chmod 600 .env
+
+# Use strong database passwords
+# Implement Twilio signature validation
+# HTTPS for webhook endpoints
+```
+
+### **Data Protection**
+- Customer phone number encryption
+- Payment data handled securely
+- Session timeout management
+- Input validation and sanitization
+
+## 📈 Analytics & Insights
+
+### **Available Metrics**
+- Daily order count and revenue
+- Popular menu items
+- Customer retention rates
+- Payment method preferences
+- Order completion times
+- Peak ordering hours
+
+### **Dashboard Metrics**
+```javascript
+// Daily statistics include:
 {
-  "restaurant_name": "Your Restaurant",
-  "categories": [
-    {
-      "name": "Main Course",
-      "items": [
-        {
-          "id": 1,
-          "name": "Chicken Biryani",
-          "price": 299,
-          "description": "Aromatic basmati rice with tender chicken"
-        }
-      ]
-    }
+  totalOrders: 45,
+  pendingOrders: 3,
+  completedOrders: 40,
+  cancelledOrders: 2,
+  totalRevenue: 8750,
+  averageOrderValue: 194,
+  topItems: [
+    { name: "Chicken Biryani", count: 15 },
+    { name: "Vegetable Pulao", count: 8 }
   ]
 }
 ```
 
-### Payment Configuration
-- Set your UPI ID in environment variables
-- Configure payment methods in `paymentService.js`
-- Customize payment messages for your region
+## 🎯 Future Enhancements
 
-## 🤝 Contributing
+### **Planned Features**
+- **📍 GPS Location**: Real-time delivery tracking
+- **🗣️ Multi-language**: Hindi, Tamil, Telugu support  
+- **📅 Order Scheduling**: Advance order booking
+- **⭐ Ratings**: Customer feedback system
+- **🎁 Loyalty Program**: Points and rewards
+- **📊 Advanced Analytics**: Business intelligence dashboard
+- **🔔 Push Notifications**: SMS backup notifications
+- **💳 Payment Gateway**: Credit/debit card integration
+- **🏪 Multi-restaurant**: Support multiple restaurant locations
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+### **Technical Roadmap**
+- Redis caching for performance
+- Horizontal scaling support
+- Advanced order routing
+- Machine learning recommendations
+- Voice message support
+- Integration APIs for POS systems
+
+## 📞 Support & Community
+
+### **Getting Help**
+- 📚 Check documentation first
+- 🐛 Create GitHub issue for bugs
+- 💡 Feature requests welcome
+- 📧 Contact: support@yourrestaurant.com
+
+### **Contributing**
+```bash
+# Fork repository
+git clone https://github.com/yourusername/whatsapp-restaurant-ordering.git
+
+# Create feature branch
+git checkout -b feature/amazing-feature
+
+# Make changes and test
+npm test
+
+# Submit pull request
+git push origin feature/amazing-feature
+```
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🆘 Support
-
-For support and questions:
-- Create an issue on GitHub
-- Check the documentation
-- Contact the maintainers
-
-## 🚀 Features Coming Soon
-
-- Multi-language support
-- Order scheduling
-- Delivery tracking
-- Customer feedback system
-- Analytics dashboard
-- Multi-restaurant support
-- Automated payment gateway integration
-- SMS notifications backup
-- Voice order support
-
-## 🔧 Recent Updates
-
-### Payment Management Enhancements
-- ✅ **Fixed payment confirmation bug** - Owner `paid [orderId]` command now targets correct order
-- ✅ **Added short code support** - Use last 4 digits of order ID for convenience
-- ✅ **Separated completion from payment** - Complete orders without automatic payment marking
-- ✅ **Enhanced dashboard** - Added "Paid Orders" filter and "Mark as Paid" button
-- ✅ **Improved payment display** - Clear indication of UPI vs COD payment status
-- ✅ **Owner command priority** - Owner commands processed before customer payment commands
-
-### Dashboard Improvements
-- ✅ **💰 Paid Orders tab** - Filter to view all paid orders
-- ✅ **Payment status indicators** - Visual payment confirmation status
-- ✅ **Manual payment confirmation** - Button to mark orders as paid
-- ✅ **Enhanced order cards** - Better payment information display
+MIT License - see [LICENSE](LICENSE) file for details.
 
 ---
 
-Made with ❤️ for restaurant businesses to embrace digital ordering through WhatsApp. messages  
-- 🍽️ Menu displays
-- 📋 Order confirmations
-- 💡 Helpful suggestions
+**Built with ❤️ for restaurant businesses embracing digital transformation through WhatsApp! 🍕📱**
 
-## Database Schema 💾
-
-The complete database schema is available in the `database-setup.sql` file. Key tables include:
-
-### Orders Table
-- Order management with customer details
-- Item details and quantities
-- Payment and delivery status
-- Timestamps and tracking information
-
-### Customers Table  
-- Customer profile management
-- Order history and preferences
-- Contact information
-
-### Menu Items Table
-- Product catalog management
-- Pricing and availability
-- Categories and descriptions
-
-*For detailed table structures and relationships, refer to the `database-setup.sql` file.*
-
-## Troubleshooting 🔧
-
-### Common Issues
-
-1. **Webhook not receiving messages**
-   - Check ngrok tunnel is active
-   - Verify webhook URL in Twilio console
-   - Ensure server is running on correct port
-
-2. **Menu not loading**
-   - Verify `menu.json` file exists and is valid JSON
-   - Check file permissions
-
-3. **Orders not saving**
-   - Check MySQL database connection
-   - Verify environment variables
-   - Review server logs for errors
-
-4. **Payment confirmation not working**
-   - Ensure owner phone number matches `RESTAURANT_OWNER_PHONE` in `.env`
-   - Use exact format: `paid ABCD` (last 4 digits of order ID)
-   - Check if order exists using `orders` command first
-   - Verify order ID format in server logs
-
-5. **Dashboard not showing paid orders**
-   - Click "💰 Paid Orders" filter button
-   - Check if orders have `paymentStatus = 'paid'` in database
-   - Refresh dashboard after marking orders as paid
-
-### Debug Mode
-
-Enable detailed logging by setting:
-```bash
-NODE_ENV=development
-```
-
-## Deployment 🌐
-
-### Production Deployment
-
-1. **Environment Setup**:
-   - Use production MySQL instance
-   - Set up proper webhook URL
-   - Configure environment variables
-
-2. **Hosting Options**:
-   - Heroku
-   - AWS EC2
-   - DigitalOcean
-   - Railway
-
-3. **Security**:
-   - Use HTTPS for webhook
-   - Validate Twilio signatures
-   - Implement rate limiting
-
-## Contributing 🤝
-
-1. Fork the repository
-2. Create feature branch: `git checkout -b feature-name`
-3. Commit changes: `git commit -m 'Add feature'`
-4. Push to branch: `git push origin feature-name`
-5. Submit pull request
-
-## License 📄
-
-MIT License - see LICENSE file for details
-
-## Support 💬
-
-For issues and questions:
-- Create GitHub issue
-- Check documentation
-- Review troubleshooting guide
-
----
-
-**Happy ordering! 🍕📱**
+*Transform your restaurant's ordering process and provide customers with a seamless WhatsApp-based ordering experience.*
