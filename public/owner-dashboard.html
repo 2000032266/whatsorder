@@ -82,6 +82,140 @@
             gap: 10px;
         }
 
+        .filter-controls {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .date-filters {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .date-filters label {
+            font-weight: bold;
+            color: #2c3e50;
+            white-space: nowrap;
+        }
+
+        .date-filters input[type="date"] {
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .date-filters input[type="date"]:focus {
+            border-color: #3498db;
+        }
+
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .pagination-controls label {
+            font-weight: bold;
+            color: #2c3e50;
+            white-space: nowrap;
+        }
+
+        .pagination-controls select {
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .pagination-controls select:focus {
+            border-color: #3498db;
+        }
+
+        .pagination-section {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .pagination-info {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .page-numbers {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .page-number {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            color: #2c3e50;
+            text-decoration: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .page-number:hover {
+            background: #e9ecef;
+        }
+
+        .page-number.active {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        .page-ellipsis {
+            padding: 8px 4px;
+            color: #6c757d;
+        }
+
+        .download-status {
+            font-size: 0.9rem;
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
         .btn {
             padding: 10px 20px;
             border: none;
@@ -98,6 +232,12 @@
 
         .btn-primary:hover {
             background: #2980b9;
+        }
+
+        .btn-primary.active-filter {
+            background: #2c3e50;
+            color: white;
+            box-shadow: 0 2px 8px rgba(44, 62, 80, 0.3);
         }
 
         .btn-success {
@@ -132,6 +272,30 @@
             font-weight: bold;
             color: #2c3e50;
             font-size: 1.1rem;
+        }
+
+        .payment-status {
+            font-size: 0.85rem;
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 15px;
+            color: white;
+        }
+
+        .payment-status.status-pending {
+            background: #f39c12;
+        }
+
+        .payment-status.status-paid {
+            background: #27ae60;
+        }
+
+        .payment-status.status-cod {
+            background: #3498db;
+        }
+
+        .payment-status.status-failed {
+            background: #e74c3c;
         }
 
         .order-status {
@@ -212,6 +376,34 @@
                 align-items: stretch;
                 gap: 15px;
             }
+            
+            .filter-controls {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 15px;
+            }
+            
+            .date-filters {
+                justify-content: center;
+            }
+            
+            .pagination-controls {
+                justify-content: center;
+            }
+            
+            .download-section {
+                justify-content: center;
+            }
+            
+            .pagination-section {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .page-numbers {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
         }
     </style>
 </head>
@@ -230,21 +422,86 @@
             <div class="section-header">
                 <h2>📋 Orders Management</h2>
                 <div class="filter-buttons">
-                    <button class="btn btn-primary" onclick="loadOrders('pending')">Pending</button>
-                    <button class="btn btn-primary" onclick="loadOrders('today')">Today</button>
-                    <button class="btn btn-primary" onclick="loadOrders('completed')">Completed</button>
-                    <button class="btn btn-primary" onclick="loadOrders('all')">All Orders</button>
+                    <button class="btn btn-primary filter-btn" id="filter-pending" onclick="loadOrders('pending')">⏳ Pending</button>
+                    <button class="btn btn-primary" id="filter-today" onclick="loadOrders('today')">📅 Today</button>
+                    <button class="btn btn-primary" id="filter-completed" onclick="loadOrders('completed')">✅ Completed</button>
+                    <button class="btn btn-primary" id="filter-paid" onclick="loadOrders('paid')">💰 Paid</button>
+                    <button class="btn btn-primary" id="filter-unpaid" onclick="loadOrders('unpaid')">💳 Unpaid</button>
+                    <button class="btn btn-primary" id="filter-cancelled" onclick="loadOrders('cancelled')">❌ Cancelled</button>
+                    <button class="btn btn-primary" id="filter-all" onclick="loadOrders('all')">📋 All Orders</button>
+                </div>
+            </div>
+            
+            <!-- Date Filter and Download Section -->
+            <div class="filter-controls">
+                <div class="date-filters">
+                    <label for="fromDate">📅 From Date:</label>
+                    <input type="date" id="fromDate" onchange="applyDateFilter()">
+                    
+                    <label for="toDate">📅 To Date:</label>
+                    <input type="date" id="toDate" onchange="applyDateFilter()">
+                    
+                    <button class="btn btn-secondary" onclick="clearDateFilter()">🗑️ Clear Dates</button>
+                </div>
+                
+                <div class="pagination-controls">
+                    <label for="pageSize">📄 Per Page:</label>
+                    <select id="pageSize" onchange="changePageSize()">
+                        <option value="10">10</option>
+                        <option value="25" selected>25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+                
+                <div class="download-section">
+                    <button class="btn btn-success" onclick="downloadOrders()">📥 Download CSV</button>
+                    <span id="downloadStatus" class="download-status"></span>
+                </div>
+            </div>
+            
+            <!-- Pagination Navigation -->
+            <div class="pagination-section" id="paginationTop" style="display: none;">
+                <div class="pagination-info">
+                    <span id="paginationInfo">Showing 0-0 of 0 orders</span>
+                </div>
+                <div class="pagination-controls">
+                    <button class="btn btn-secondary" id="prevPage" onclick="previousPage()" disabled>⬅️ Previous</button>
+                    <span class="page-numbers" id="pageNumbers"></span>
+                    <button class="btn btn-secondary" id="nextPage" onclick="nextPage()" disabled>Next ➡️</button>
                 </div>
             </div>
             
             <div id="ordersContainer">
                 <div class="loading">Loading orders...</div>
             </div>
+            
+            <!-- Bottom Pagination -->
+            <div class="pagination-section" id="paginationBottom" style="display: none;">
+                <div class="pagination-info">
+                    <span id="paginationInfoBottom">Showing 0-0 of 0 orders</span>
+                </div>
+                <div class="pagination-controls">
+                    <button class="btn btn-secondary" onclick="previousPage()" disabled id="prevPageBottom">⬅️ Previous</button>
+                    <span class="page-numbers" id="pageNumbersBottom"></span>
+                    <button class="btn btn-secondary" onclick="nextPage()" disabled id="nextPageBottom">Next ➡️</button>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
         let currentFilter = 'pending';
+        
+        // Pagination variables
+        let currentPage = 1;
+        let pageSize = 25;
+        let totalOrders = 0;
+        let totalPages = 0;
+        
+        // Date filtering functions
+        let fromDate = '';
+        let toDate = '';
 
         // Load dashboard data
         async function loadDashboard() {
@@ -286,12 +543,34 @@
         // Load orders with filter
         async function loadOrders(filter = 'pending') {
             currentFilter = filter;
+            
+            // Update active filter button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active-filter');
+            });
+            
+            const activeBtn = document.getElementById(`filter-${filter}`);
+            if (activeBtn) {
+                activeBtn.classList.add('active-filter');
+            }
+            
             document.getElementById('ordersContainer').innerHTML = '<div class="loading">Loading orders...</div>';
             
             try {
-                const response = await fetch(`/owner/orders?filter=${filter}`);
+                // Build query parameters
+                let queryParams = `filter=${filter}&page=${currentPage}&limit=${pageSize}`;
+                if (fromDate) queryParams += `&fromDate=${fromDate}`;
+                if (toDate) queryParams += `&toDate=${toDate}`;
+                
+                const response = await fetch(`/owner/orders?${queryParams}`);
                 const data = await response.json();
+                
+                // Update pagination info
+                totalOrders = data.totalCount || data.count || 0;
+                totalPages = Math.ceil(totalOrders / pageSize);
+                
                 displayOrders(data.orders);
+                updatePagination();
             } catch (error) {
                 console.error('Error loading orders:', error);
                 document.getElementById('ordersContainer').innerHTML = '<div class="loading">Error loading orders</div>';
@@ -310,6 +589,9 @@
                     <div class="order-header">
                         <div class="order-id">Order #${order.id}</div>
                         <div class="order-status status-${order.status}">${order.status.toUpperCase()}</div>
+                        <div class="payment-status status-${order.paymentStatus || 'pending'}">
+                            💳 ${(order.paymentStatus || 'pending').toUpperCase()}
+                        </div>
                     </div>
                     
                     <div class="order-details">
@@ -350,6 +632,14 @@
                             </button>
                         </div>
                     ` : ''}
+                    
+                    ${order.status === 'completed' && (order.paymentStatus === 'pending' || order.paymentStatus === 'cod' || !order.paymentStatus) ? `
+                        <div class="order-actions">
+                            <button class="btn btn-primary" onclick="markOrderAsPaid('${order.id}')">
+                                💰 Mark as Paid
+                            </button>
+                        </div>
+                    ` : ''}
                 </div>
             `).join('');
             
@@ -380,6 +670,229 @@
                 console.error('Error updating order:', error);
                 alert('Error updating order status');
             }
+        }
+
+        // Mark order as paid
+        async function markOrderAsPaid(orderId) {
+            try {
+                const response = await fetch(`/owner/orders/${orderId}/payment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ action: 'mark_paid' })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Reload current view
+                    loadOrders(currentFilter);
+                    loadDashboard(); // Refresh stats
+                    alert('✅ Payment marked as completed successfully!');
+                } else {
+                    alert('Error marking payment as paid: ' + (result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error marking order as paid:', error);
+                alert('Error marking order as paid');
+            }
+        }
+
+        // Date filtering functions
+        function applyDateFilter() {
+            fromDate = document.getElementById('fromDate').value;
+            toDate = document.getElementById('toDate').value;
+            
+            console.log('Applying date filter:', { fromDate, toDate });
+            currentPage = 1; // Reset to first page when filtering
+            loadOrders(currentFilter);
+        }
+
+        function clearDateFilter() {
+            document.getElementById('fromDate').value = '';
+            document.getElementById('toDate').value = '';
+            fromDate = '';
+            toDate = '';
+            currentPage = 1; // Reset to first page
+            loadOrders(currentFilter);
+        }
+
+        // CSV Download function - Client-side generation using existing API
+        async function downloadOrders() {
+            try {
+                document.getElementById('downloadStatus').textContent = 'Preparing download...';
+                
+                // Build query parameters to get ALL matching orders (no pagination)
+                let queryParams = `filter=${currentFilter || 'all'}&limit=1000`;
+                if (fromDate) queryParams += `&fromDate=${fromDate}`;
+                if (toDate) queryParams += `&toDate=${toDate}`;
+                
+                // Use the existing working endpoint
+                const response = await fetch(`/owner/orders?${queryParams}`);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch orders');
+                }
+                
+                const data = await response.json();
+                const orders = data.orders || [];
+                
+                if (orders.length === 0) {
+                    document.getElementById('downloadStatus').textContent = '⚠️ No orders to download';
+                    setTimeout(() => {
+                        document.getElementById('downloadStatus').textContent = '';
+                    }, 3000);
+                    return;
+                }
+                
+                // Generate CSV content
+                const csvHeader = 'Order ID,Customer Name,Phone,Location,Items,Total Amount,Status,Payment Status,Payment Method,Order Date,Order Time\n';
+                
+                const csvRows = orders.map(order => {
+                    const itemsText = order.items.map(item => `${item.quantity}x ${item.name}`).join('; ');
+                    const location = (order.location || 'Not specified').replace(/,/g, ';').replace(/"/g, '""'); // Escape quotes and commas
+                    const customerName = (order.customer || 'Customer').replace(/"/g, '""'); // Escape quotes
+                    const phone = order.phone || '';
+                    const orderDate = new Date(order.time).toLocaleDateString();
+                    const orderTime = new Date(order.time).toLocaleTimeString();
+                    
+                    return `"${order.id}","${customerName}","${phone}","${location}","${itemsText}","₹${parseFloat(order.total).toFixed(2)}","${order.status}","${order.paymentStatus || 'pending'}","${order.paymentMethod || 'cod'}","${orderDate}","${orderTime}"`;
+                }).join('\n');
+                
+                const csvContent = csvHeader + csvRows;
+                
+                // Create and download the file
+                const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' }); // Add BOM for UTF-8
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                
+                // Generate filename with current date and filter
+                const today = new Date().toISOString().split('T')[0];
+                const filterName = currentFilter || 'all';
+                a.download = `orders-${filterName}-${today}.csv`;
+                
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                document.getElementById('downloadStatus').textContent = `✅ Downloaded ${orders.length} orders!`;
+                setTimeout(() => {
+                    document.getElementById('downloadStatus').textContent = '';
+                }, 3000);
+                
+            } catch (error) {
+                console.error('Error downloading orders:', error);
+                document.getElementById('downloadStatus').textContent = '❌ Download failed';
+                setTimeout(() => {
+                    document.getElementById('downloadStatus').textContent = '';
+                }, 3000);
+            }
+        }
+
+        // Pagination functions
+        function updatePagination() {
+            const showPagination = totalPages > 1;
+            
+            // Show/hide pagination sections
+            document.getElementById('paginationTop').style.display = showPagination ? 'flex' : 'none';
+            document.getElementById('paginationBottom').style.display = showPagination ? 'flex' : 'none';
+            
+            if (!showPagination) return;
+            
+            // Update pagination info
+            const startItem = ((currentPage - 1) * pageSize) + 1;
+            const endItem = Math.min(currentPage * pageSize, totalOrders);
+            const infoText = `Showing ${startItem}-${endItem} of ${totalOrders} orders`;
+            
+            document.getElementById('paginationInfo').textContent = infoText;
+            document.getElementById('paginationInfoBottom').textContent = infoText;
+            
+            // Update navigation buttons
+            const prevDisabled = currentPage <= 1;
+            const nextDisabled = currentPage >= totalPages;
+            
+            ['prevPage', 'prevPageBottom'].forEach(id => {
+                const btn = document.getElementById(id);
+                btn.disabled = prevDisabled;
+                btn.style.opacity = prevDisabled ? '0.5' : '1';
+            });
+            
+            ['nextPage', 'nextPageBottom'].forEach(id => {
+                const btn = document.getElementById(id);
+                btn.disabled = nextDisabled;
+                btn.style.opacity = nextDisabled ? '0.5' : '1';
+            });
+            
+            // Update page numbers
+            updatePageNumbers();
+        }
+
+        function updatePageNumbers() {
+            const pageNumbersHtml = generatePageNumbers();
+            document.getElementById('pageNumbers').innerHTML = pageNumbersHtml;
+            document.getElementById('pageNumbersBottom').innerHTML = pageNumbersHtml;
+        }
+
+        function generatePageNumbers() {
+            let html = '';
+            
+            // Show first page
+            if (currentPage > 3) {
+                html += `<span class="page-number" onclick="goToPage(1)">1</span>`;
+                if (currentPage > 4) {
+                    html += '<span class="page-ellipsis">...</span>';
+                }
+            }
+            
+            // Show pages around current page
+            const start = Math.max(1, currentPage - 2);
+            const end = Math.min(totalPages, currentPage + 2);
+            
+            for (let i = start; i <= end; i++) {
+                const activeClass = i === currentPage ? ' active' : '';
+                html += `<span class="page-number${activeClass}" onclick="goToPage(${i})">${i}</span>`;
+            }
+            
+            // Show last page
+            if (currentPage < totalPages - 2) {
+                if (currentPage < totalPages - 3) {
+                    html += '<span class="page-ellipsis">...</span>';
+                }
+                html += `<span class="page-number" onclick="goToPage(${totalPages})">${totalPages}</span>`;
+            }
+            
+            return html;
+        }
+
+        function goToPage(page) {
+            if (page >= 1 && page <= totalPages && page !== currentPage) {
+                currentPage = page;
+                loadOrders(currentFilter);
+            }
+        }
+
+        function previousPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                loadOrders(currentFilter);
+            }
+        }
+
+        function nextPage() {
+            if (currentPage < totalPages) {
+                currentPage++;
+                loadOrders(currentFilter);
+            }
+        }
+
+        function changePageSize() {
+            pageSize = parseInt(document.getElementById('pageSize').value);
+            currentPage = 1; // Reset to first page
+            loadOrders(currentFilter);
         }
 
         // Auto-refresh every 30 seconds

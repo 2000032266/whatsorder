@@ -173,9 +173,10 @@ class OrderService {
    * Get orders with filtering options for restaurant owner
    * @param {string} filter - Filter type: 'pending', 'today', 'completed', 'all'
    * @param {number} limit - Maximum number of orders to return
+   * @param {number} offset - Number of orders to skip for pagination
    * @returns {Promise<Array>} Filtered orders
    */
-  async getOrdersForOwner(filter = 'pending', limit = 20) {
+  async getOrdersForOwner(filter = 'pending', limit = 500, offset = 0) {
     try {
       let whereClause = {};
       
@@ -191,6 +192,10 @@ class OrderService {
           break;
         case 'paid':
           whereClause.paymentStatus = 'paid';
+          break;
+        case 'unpaid':
+          whereClause.paymentStatus = 'pending';
+          whereClause.status = { [Op.ne]: 'cancelled' }; // Exclude cancelled orders
           break;
         case 'today':
           const today = new Date();
@@ -210,11 +215,62 @@ class OrderService {
       return await Order.findAll({
         where: whereClause,
         order: [['createdAt', 'DESC']],
-        limit
+        limit,
+        offset
       });
     } catch (error) {
       console.error('Error getting orders for owner:', error);
       return [];
+    }
+  }
+
+  /**
+   * Get total count of orders for pagination
+   * @param {string} filter - Filter type
+   * @returns {Promise<number>} Total count of orders
+   */
+  async getOrdersCountForOwner(filter = 'pending') {
+    try {
+      let whereClause = {};
+      
+      switch (filter) {
+        case 'pending':
+          whereClause.status = 'pending';
+          break;
+        case 'completed':
+          whereClause.status = 'completed';
+          break;
+        case 'cancelled':
+          whereClause.status = 'cancelled';
+          break;
+        case 'paid':
+          whereClause.paymentStatus = 'paid';
+          break;
+        case 'unpaid':
+          whereClause.paymentStatus = 'pending';
+          whereClause.status = { [Op.ne]: 'cancelled' }; // Exclude cancelled orders
+          break;
+        case 'today':
+          const today = new Date();
+          const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+          const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59);
+          whereClause.createdAt = {
+            [Op.gte]: startOfDay,
+            [Op.lte]: endOfDay
+          };
+          break;
+        case 'all':
+        default:
+          // No additional filtering
+          break;
+      }
+
+      return await Order.count({
+        where: whereClause
+      });
+    } catch (error) {
+      console.error('Error getting orders count for owner:', error);
+      return 0;
     }
   }
 

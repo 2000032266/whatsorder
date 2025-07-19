@@ -516,40 +516,11 @@ const paymentStatuses = [
 
 ## 🚀 Deployment Options
 
-### **Railway Deployment** 🚂
-
-**Quick Deploy**: [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template)
-
-**Manual Setup**:
-1. Connect GitHub repository to Railway
-2. Add MySQL database service 
-3. Configure environment variables:
-   ```bash
-   # Twilio WhatsApp (Required)
-   TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxx
-   TWILIO_AUTH_TOKEN=your_auth_token
-   TWILIO_PHONE_NUMBER=whatsapp:+14155238886
-   
-   # Restaurant Settings (Required)
-   RESTAURANT_OWNER_PHONE=whatsapp:+919876543210
-   WEBHOOK_URL=https://your-app.railway.app
-   
-   # Database (Auto-configured by Railway MySQL)
-   DATABASE_URL=mysql://user:pass@host:port/db
-   ```
+### **Railway Deployment**
+1. Fork repository to GitHub
+2. Connect to Railway
+3. Set environment variables
 4. Deploy automatically
-5. Update Twilio webhook: `https://your-app.railway.app/webhook`
-
-**📋 Detailed Guide**: [RAILWAY_DEPLOYMENT.md](RAILWAY_DEPLOYMENT.md)
-
-**✅ Verification**: 
-```bash
-# Check health
-curl https://your-app.railway.app/health
-
-# Test deployment
-bash verify-deployment.sh
-```
 
 ### **Heroku Deployment**
 ```bash

@@ -404,11 +404,6 @@ class CustomerService {
   generateCurrentLocationConfirmation(name, currentLocation, savedLocation = null) {
     let message = `📍 Got it, ${name}! You're currently at: *${currentLocation}*\n\n`;
     
-    if (savedLocation && savedLocation !== currentLocation) {
-      message += `🏠 Your saved location: ${savedLocation}\n`;
-      message += `📍 Current location: ${currentLocation}\n\n`;
-    }
-    
     message += `🍽️ *Ready to order!*\n` +
       `• Type 'menu' - See our menu\n` +
       `• Type 'order [item name]' - Place an order\n` +

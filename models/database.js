@@ -3,19 +3,24 @@ require('dotenv').config();
 
 // Create Sequelize instance
 const sequelize = new Sequelize(
-  process.env.MYSQL_DATABASE,
-  process.env.MYSQL_USER,
-  process.env.MYSQL_PASSWORD,
+  process.env.MYSQL_DATABASE || process.env.DATABASE_NAME,
+  process.env.MYSQL_USER || process.env.DATABASE_USER,
+  process.env.MYSQL_PASSWORD || process.env.DATABASE_PASSWORD,
   {
-    host: process.env.MYSQL_HOST,
-    port: process.env.MYSQL_PORT,
+    host: process.env.MYSQL_HOST || process.env.DATABASE_HOST,
+    port: process.env.MYSQL_PORT || process.env.DATABASE_PORT || 3306,
     dialect: 'mysql',
-    logging: false, // Set to console.log to see SQL queries
+    logging: process.env.NODE_ENV === 'development' ? console.log : false,
     pool: {
-      max: 5,
+      max: 10,
       min: 0,
-      acquire: 30000,
+      acquire: 60000,
       idle: 10000
+    },
+    dialectOptions: {
+      connectTimeout: 60000,
+      acquireTimeout: 60000,
+      timeout: 60000,
     }
   }
 );

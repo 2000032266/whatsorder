@@ -87,15 +87,15 @@ class ResponseTemplates {
   static getRecentOrdersMessage(orders) {
     let message = "📋 *Your Recent Orders:*\n\n";
     
-    orders.slice(0, 3).forEach((order, index) => {
+    orders.slice(0, 5).forEach((order, index) => {
       message += `${index + 1}. Order #${order.orderId}\n`;
       message += `   📅 ${order.orderDate.toLocaleDateString()}\n`;
       message += `   💰 ₹${parseFloat(order.totalAmount).toFixed(2)}\n`;
       message += `   📊 Status: ${order.status.toUpperCase()}\n\n`;
     });
 
-    if (orders.length > 3) {
-      message += `... and ${orders.length - 3} more orders\n\n`;
+    if (orders.length > 5) {
+      message += `... and ${orders.length - 5} more orders\n\n`;
     }
 
     message += "💡 Need to place a new order? Type 'menu' to get started!";

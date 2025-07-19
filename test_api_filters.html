@@ -1,0 +1,42 @@
+console.log('Testing API filters...');
+
+async function testFilters() {
+    try {
+        console.log('\n=== Testing PAID filter ===');
+        const paidResponse = await fetch('http://localhost:3000/owner/orders?filter=paid&limit=3');
+        const paidData = await paidResponse.json();
+        console.log(`Paid filter returned ${paidData.orders.length} orders:`);
+        paidData.orders.forEach(order => {
+            console.log(`- ID: ${order.id}, PaymentStatus: ${order.paymentStatus}, Status: ${order.status}`);
+        });
+        
+        console.log('\n=== Testing UNPAID filter ===');
+        const unpaidResponse = await fetch('http://localhost:3000/owner/orders?filter=unpaid&limit=3');
+        const unpaidData = await unpaidResponse.json();
+        console.log(`Unpaid filter returned ${unpaidData.orders.length} orders:`);
+        unpaidData.orders.forEach(order => {
+            console.log(`- ID: ${order.id}, PaymentStatus: ${order.paymentStatus}, Status: ${order.status}`);
+        });
+        
+        console.log('\n=== Analysis ===');
+        const unpaidShouldBePending = unpaidData.orders.every(order => order.paymentStatus === 'pending');
+        const paidShouldBePaid = paidData.orders.every(order => order.paymentStatus === 'paid');
+        
+        console.log(`Unpaid filter correct (all pending): ${unpaidShouldBePending}`);
+        console.log(`Paid filter correct (all paid): ${paidShouldBePaid}`);
+        
+        if (!unpaidShouldBePending) {
+            console.log('🚨 BUG FOUND: Unpaid filter returning non-pending orders!');
+            unpaidData.orders.forEach(order => {
+                if (order.paymentStatus !== 'pending') {
+                    console.log(`  - WRONG: ID ${order.id} has paymentStatus: ${order.paymentStatus}`);
+                }
+            });
+        }
+        
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+testFilters();

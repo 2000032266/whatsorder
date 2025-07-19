@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Download</title>
+</head>
+<body>
+    <h1>Test CSV Download</h1>
+    <button onclick="testDownload()">Test Download All Orders</button>
+    <div id="status"></div>
+
+    <script>
+        async function testDownload() {
+            try {
+                document.getElementById('status').textContent = 'Testing download...';
+                
+                // Fetch orders data
+                const response = await fetch('/owner/orders?filter=all&limit=1000');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch orders');
+                }
+                
+                const data = await response.json();
+                const orders = data.orders || [];
+                
+                if (orders.length === 0) {
+                    document.getElementById('status').textContent = 'No orders found';
+                    return;
+                }
+                
+                // Generate CSV content
+                const csvHeader = 'Order ID,Customer Name,Phone,Location,Items,Total Amount,Status,Payment Status,Payment Method,Order Date,Order Time\n';
+                
+                const csvRows = orders.map(order => {
+                    const itemsText = order.items.map(item => `${item.quantity}x ${item.name}`).join('; ');
+                    const location = (order.location || 'Not specified').replace(/,/g, ';').replace(/"/g, '""');
+                    const customerName = (order.customer || 'Customer').replace(/"/g, '""');
+                    const phone = order.phone || '';
+                    const orderDate = new Date(order.time).toLocaleDateString();
+                    const orderTime = new Date(order.time).toLocaleTimeString();
+                    
+                    return `"${order.id}","${customerName}","${phone}","${location}","${itemsText}","₹${parseFloat(order.total).toFixed(2)}","${order.status}","${order.paymentStatus || 'pending'}","${order.paymentMethod || 'cod'}","${orderDate}","${orderTime}"`;
+                }).join('\n');
+                
+                const csvContent = csvHeader + csvRows;
+                
+                // Create and download the file
+                const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = `test-orders-${new Date().toISOString().split('T')[0]}.csv`;
+                
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                document.getElementById('status').textContent = `✅ Downloaded ${orders.length} orders successfully!`;
+            } catch (error) {
+                console.error('Download error:', error);
+                document.getElementById('status').textContent = `❌ Download failed: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

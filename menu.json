@@ -1,5 +1,5 @@
 {
-  "date": "2025-07-17",
+  "date": "2025-07-19",
   "restaurant_name": "Delicious Bites",
   "menu": [
     {
@@ -67,7 +67,7 @@
     },
     {
       "id": 11,
-      "name": "pulka",
+      "name": "pulkas",
       "description": "Delicious pulka",
       "price": 15,
       "category": "Bread",
@@ -106,6 +106,15 @@
       "name": "neti idly",
       "description": "Delicious idly",
       "price": 20,
+      "category": "Main Course",
+      "available": true,
+      "emoji": "🍛"
+    },
+    {
+      "id": 16,
+      "name": "pulav",
+      "description": "Delicious pulav",
+      "price": 100,
       "category": "Main Course",
       "available": true,
       "emoji": "🍛"
