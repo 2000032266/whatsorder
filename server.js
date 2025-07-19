@@ -18,6 +18,12 @@ const ResponseTemplates = require('./utils/responseTemplates');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Add Railway-specific middleware for better logging
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path} - ${new Date().toISOString()}`);
+  next();
+});
+
 // Middleware
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -543,8 +549,8 @@ async function handleOwnerOrdersRequest(data) {
       return `📋 *No ${data.filter} orders found.*\n\n• "orders today" - Today's orders\n• "stats" - Daily summary`;
     }
 
-    // Ultra-safe limit: Start with 3 orders and expand if we have room
-    let displayOrders = orders.slice(0, 3);
+    // Increase limit to show more orders (up to 8 orders instead of 3)
+    let displayOrders = orders.slice(0, 8);
     let message = `📋 *${data.filter.toUpperCase()} ORDERS (${orders.length})*\n\n`;
     
     // Build message for orders
@@ -605,20 +611,19 @@ async function handleOwnerOrdersRequest(data) {
       // Emergency compact format
       message = `📋 *${data.filter.toUpperCase()} (${orders.length})*\n\n`;
       
-      orders.slice(0, 2).forEach((order, index) => {
+      orders.slice(0, 4).forEach((order, index) => {
         const shortId = order.orderId.split('-').pop();
         const name = (order.customerName || 'Customer').substring(0, 15);
         message += `${index + 1}. (${shortId}) ${name} - ₹${parseFloat(order.totalAmount).toFixed(0)}\n`;
       });
       
-      if (orders.length > 2) {
-        message += `... +${orders.length - 2} more\n`;
+      if (orders.length > 4) {
+        message += `... +${orders.length - 4} more\n`;
       }
       
       message += `\n"done 1" to complete first order`;
     }
 
-    console.log(`📏 Orders response length: ${message.length} characters`);
     return message;
   } catch (error) {
     console.error('Error handling owner orders request:', error);
@@ -1160,7 +1165,7 @@ app.get('/health', (req, res) => {
 });
 
 /**
- * Get menu endpoint (for testing)
+ * Get menu endpoint
  */
 app.get('/menu', async (req, res) => {
   try {
@@ -1255,13 +1260,24 @@ app.get('/owner/dashboard', async (req, res) => {
 
 app.get('/owner/orders', async (req, res) => {
   try {
-    const { filter = 'pending', limit = 50, fromDate, toDate, customer } = req.query;
+    const { filter = 'pending', limit = 100, page = 1, fromDate, toDate, customer } = req.query;
+    const pageSize = parseInt(limit);
+    const currentPage = parseInt(page);
+    const offset = (currentPage - 1) * pageSize;
     
     let orders;
     if (filter === 'cancelled') {
-      orders = await orderService.getOrdersForOwner('cancelled');
+      orders = await orderService.getOrdersForOwner('cancelled', pageSize, offset);
     } else {
-      orders = await orderService.getOrdersForOwner(filter);
+      orders = await orderService.getOrdersForOwner(filter, pageSize, offset);
+    }
+    
+    // Get total count for pagination (before filtering)
+    let totalCount;
+    if (filter === 'cancelled') {
+      totalCount = await orderService.getOrdersCountForOwner('cancelled');
+    } else {
+      totalCount = await orderService.getOrdersCountForOwner(filter);
     }
     
     // Apply date filtering if provided
@@ -1281,9 +1297,6 @@ app.get('/owner/orders', async (req, res) => {
       );
     }
     
-    // Limit results
-    orders = orders.slice(0, parseInt(limit));
-    
     const formattedOrders = orders.map(order => ({
       id: order.orderId,
       customer: order.customerName,
@@ -1299,7 +1312,13 @@ app.get('/owner/orders', async (req, res) => {
       paymentId: order.paymentId || null
     }));
     
-    res.json({ orders: formattedOrders, count: formattedOrders.length });
+    res.json({ 
+      orders: formattedOrders, 
+      count: formattedOrders.length,
+      totalCount: totalCount,
+      currentPage: currentPage,
+      totalPages: Math.ceil(totalCount / pageSize)
+    });
   } catch (error) {
     console.error('Error getting filtered orders:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -1398,149 +1417,11 @@ app.get('/dashboard', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'enhanced-owner-dashboard.html'));
 });
 
-// Debug endpoint for testing message processing (remove in production)
-app.post('/debug/message', async (req, res) => {
-  try {
-    const { message, phone } = req.body;
-    const customerPhone = phone || '+1234567890';
-    
-    console.log(`🧪 Debug message from ${customerPhone}: ${message}`);
-
-    // Parse the message to determine intent
-    const parseResult = await messageParser.parseMessage(message, customerPhone);
-    
-    let responseMessage = '';
-
-    switch (parseResult.intent) {
-      case 'request_customer_name':
-        responseMessage = await handleRequestCustomerName();
-        break;
-
-      case 'save_customer_name':
-        responseMessage = await handleSaveCustomerName(parseResult.data);
-        break;
-
-      case 'show_menu':
-        responseMessage = await handleMenuRequest(customerPhone);
-        break;
-
-      case 'place_order':
-        responseMessage = await handleOrderRequest(parseResult.data, customerPhone, message);
-        break;
-
-      case 'help':
-        responseMessage = await handleHelpRequest(customerPhone);
-        break;
-
-      case 'order_status':
-        responseMessage = await handleStatusRequest(customerPhone);
-        break;
-
-      case 'search_menu':
-        responseMessage = await handleSearchRequest(parseResult.data);
-        break;
-
-      case 'owner_orders':
-        responseMessage = await handleOwnerOrdersRequest(parseResult.data);
-        break;
-
-      case 'owner_complete_order':
-        responseMessage = await handleOwnerCompleteOrder(parseResult.data);
-        break;
-
-      case 'owner_cancel_order':
-        responseMessage = await handleOwnerCancelOrder(parseResult.data);
-        break;
-
-      case 'owner_mark_paid':
-        responseMessage = await handleOwnerMarkPaid(parseResult.data);
-        break;
-
-      case 'owner_stats':
-        responseMessage = await handleOwnerStatsRequest();
-        break;
-
-      case 'owner_menu_manage':
-        responseMessage = await handleOwnerMenuManage();
-        break;
-
-      case 'owner_add_item':
-        responseMessage = await handleOwnerAddItem(parseResult.data);
-        break;
-
-      case 'owner_edit_item':
-        responseMessage = await handleOwnerEditItem(parseResult.data);
-        break;
-
-      case 'owner_delete_item':
-        responseMessage = await handleOwnerDeleteItem(parseResult.data);
-        break;
-
-      case 'owner_toggle_item':
-        responseMessage = await handleOwnerToggleItem(parseResult.data);
-        break;
-
-      case 'select_payment_method':
-        responseMessage = await handlePaymentMethodSelection(parseResult.data);
-        break;
-
-      case 'confirm_payment':
-        responseMessage = await handlePaymentConfirmation(parseResult.data);
-        break;
-
-      case 'payment_status':
-        responseMessage = await handlePaymentStatusRequest(parseResult.data);
-        break;
-
-      case 'payment_options':
-        responseMessage = await handlePaymentOptionsRequest(parseResult.data);
-        break;
-
-      case 'payment_help':
-        responseMessage = await handlePaymentHelpRequest();
-        break;
-
-      case 'unknown':
-      default:
-        responseMessage = await handleUnknownMessage(message, customerPhone);
-        break;
-    }
-
-    res.json({
-      intent: parseResult.intent,
-      response: responseMessage,
-      parseData: parseResult.data
-    });
-  } catch (error) {
-    console.error('❌ Debug error:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 WhatsApp Food Ordering Bot server is running on port ${PORT}`);
   console.log(`📱 Webhook URL: ${process.env.WEBHOOK_URL || `http://localhost:${PORT}`}/webhook`);
-  console.log(`🍽️ Menu endpoint: http://localhost:${PORT}/menu`);
   console.log(`❤️ Health check: http://localhost:${PORT}/health`);
-  
-  // Display startup information
-  console.log('\n📋 Bot Features:');
-  console.log('✅ WhatsApp message handling');
-  console.log('✅ Menu display with emojis');
-  console.log('✅ Order processing and confirmation');
-  console.log('✅ Customer and owner notifications');
-  console.log('✅ Order status tracking');
-  console.log('✅ Smart message parsing');
-  console.log('✅ Search functionality');
-  console.log('✅ Help and status commands');
-  
-  console.log('\n🔧 Setup Instructions:');
-  console.log('1. Update .env file with your Twilio credentials');
-  console.log('2. Set up MongoDB connection (optional, uses file storage as fallback)');
-  console.log('3. Configure webhook URL in Twilio console');
-  console.log('4. Update menu.json with your restaurant menu');
-  console.log('5. Test the bot by sending WhatsApp messages!');
 });
 
 // Graceful shutdown

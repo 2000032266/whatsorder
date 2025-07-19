@@ -616,17 +616,6 @@ cat menu.json | jq .
 ls -la menu.json
 ```
 
-### **Debug Mode**
-```bash
-# Enable detailed logging
-NODE_ENV=development npm start
-
-# Use debug endpoint
-curl -X POST http://localhost:3000/debug/message \
-  -H "Content-Type: application/json" \
-  -d '{"message": "hi", "phone": "+1234567890"}'
-```
-
 ## 📊 Performance & Scaling
 
 ### **Database Optimization**

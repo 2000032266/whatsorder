@@ -112,7 +112,6 @@ SESSION_SECRET=your_session_secret
 
 ### **Logs and Debugging**
 - View logs in Railway dashboard → **Deployments** → **View Logs**
-- Debug endpoint: `https://your-app-name.railway.app/debug/message`
 
 ## 🔧 **Post-Deployment Configuration**
 
